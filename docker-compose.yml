@@ -1,22 +1,4 @@
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nestjs-api
-    ports:
-      - "${APP_PORT}:${APP_PORT}"
-    environment:
-      - MONGODB_URI=${MONGODB_URI}
-      - PORT=${APP_PORT}
-      - NODE_ENV=${NODE_ENV}
-      - APP_NAME=${APP_NAME}
-      - APP_HOST=${APP_HOST}
-    depends_on:
-      - mongodb
-    networks:
-      - monitoring
-
   mongodb:
     image: mongo:latest
     container_name: nestjs-mongodb

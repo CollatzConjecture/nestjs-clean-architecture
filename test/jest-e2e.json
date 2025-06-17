@@ -11,5 +11,9 @@
     "^@application/(.*)$": "<rootDir>/../src/application/$1",
     "^@infrastructure/(.*)$": "<rootDir>/../src/infrastructure/$1",
     "^@constants$": "<rootDir>/../src/constants"
-  }
+  },
+  "testTimeout": 60000,
+  "setupFilesAfterEnv": ["<rootDir>/setup-e2e.ts"],
+  "forceExit": true,
+  "detectOpenHandles": false
 }

@@ -3,7 +3,8 @@ dotenv.config();
 
 // Database Constants
 export const DB_PROVIDER = 'DbConnectionToken';
-export const USER_MODEL_PROVIDER = 'UserModelProvider';
+export const PROFILE_MODEL_PROVIDER = 'ProfileModelProvider';
+export const AUTH_MODEL_PROVIDER = 'AuthModelProvider';
 export const SERVICE = 'DB_MONGO_SERVICE';
 export const DATABASE_SERVICE = process.env.DATABASE_SERVICE || 'DATABASE_SERVICE';
 
@@ -16,6 +17,12 @@ export const NODE_ENV = process.env.NODE_ENV || 'development';
 // MongoDB Constants
 export const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/nestjs';
 export const MONGO_PORT = parseInt(process.env.MONGO_PORT || '27017', 10);
+
+// JWT Constants
+export const JWT_SECRET = process.env.JWT_SECRET || 'your-default-secret';
+export const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-default-refresh-secret';
+export const JWT_EXPIRATION_TIME = process.env.JWT_EXPIRATION_TIME || '3600s';
+export const JWT_REFRESH_EXPIRATION_TIME = process.env.JWT_REFRESH_EXPIRATION_TIME || '7d';
 
 // Grafana Constants
 export const GRAFANA_USER = process.env.GRAFANA_USER || 'admin';

@@ -1,0 +1,25 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nestjs-api
+    volumes:
+      - ./src:/usr/src/app/src
+      - /usr/src/app/node_modules
+    command: npm run start:dev
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+      - "9229:9229"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=${MONGODB_URI}
+      - PORT=${APP_PORT}
+      - APP_NAME=${APP_NAME}
+      - APP_HOST=${APP_HOST}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    depends_on:
+      - mongodb
+    networks:
+      - monitoring 

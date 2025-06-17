@@ -1,15 +1,15 @@
-import { IsNotEmpty, IsNumber, IsString} from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class User {
+export class Profile {
   @ApiProperty({
-    description: 'The unique identifier of the user',
+    description: 'The unique identifier of the profile',
     example: '123e4567-e89b-12d3-a456-426614174000'
   })
-  readonly _id?: string;
+  readonly id: string;
 
   @ApiProperty({
-    description: 'The name of the user',
+    description: 'The name of the profile',
     example: 'John Doe'
   })
   @IsString()
@@ -17,7 +17,7 @@ export class User {
   name: string;
 
   @ApiProperty({
-    description: 'The lastname of the user',
+    description: 'The lastname of the profile',
     example: 'Smith'
   })
   @IsString()
@@ -25,7 +25,7 @@ export class User {
   lastname: string;
 
   @ApiProperty({
-    description: 'The age of the user',
+    description: 'The age of the profile',
     example: 25
   })
   @IsNumber()
