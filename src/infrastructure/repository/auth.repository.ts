@@ -24,4 +24,9 @@ export class AuthRepository {
   async delete(id: string): Promise<void> {
     await this.authModel.findByIdAndDelete(id).exec();
   }
+
+  async findByAuthId(authId: string): Promise<Auth> {
+    const query = this.authModel.findOne({ id: authId });
+    return await query.exec();
+  }
 }

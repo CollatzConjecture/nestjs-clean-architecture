@@ -1,10 +1,9 @@
-import { CommandHandler, ICommandHandler, EventPublisher } from '@nestjs/cqrs';
-import { CreateAuthUserCommand } from '../create-auth-user.command';
-import { AuthRepository } from '@infrastructure/repository/auth.repository';
-import * as bcrypt from 'bcrypt';
-import { ConflictException } from '@nestjs/common';
-import { AuthUserCreatedEvent } from '../../events/auth-user-created.event';
 import { UserAggregate } from '@domain/aggregates/user.aggregate';
+import { AuthRepository } from '@infrastructure/repository/auth.repository';
+import { ConflictException } from '@nestjs/common';
+import { CommandHandler, EventPublisher, ICommandHandler } from '@nestjs/cqrs';
+import { AuthUserCreatedEvent } from '../../events/auth-user-created.event';
+import { CreateAuthUserCommand } from '../create-auth-user.command';
 
 @CommandHandler(CreateAuthUserCommand)
 export class CreateAuthUserHandler implements ICommandHandler<CreateAuthUserCommand> {
@@ -14,7 +13,7 @@ export class CreateAuthUserHandler implements ICommandHandler<CreateAuthUserComm
   ) {}
 
   async execute(command: CreateAuthUserCommand): Promise<void> {
-    const { registerAuthDto, userId } = command;
+    const { registerAuthDto, authId, profileId } = command;
     const { email, password, name, lastname, age } = registerAuthDto;
 
     const existingAuth = await this.authRepository.findByEmail(email);
@@ -27,12 +26,12 @@ export class CreateAuthUserHandler implements ICommandHandler<CreateAuthUserComm
     );
 
     await this.authRepository.create({
-      id: userId,
+      id: authId,
       email,
       password,
     });
     
-    user.apply(new AuthUserCreatedEvent(userId, name, lastname, age));
+    user.apply(new AuthUserCreatedEvent(authId, profileId, name, lastname, age));
     user.commit();
   }
 } 

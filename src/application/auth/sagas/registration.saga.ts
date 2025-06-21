@@ -16,8 +16,8 @@ export class RegistrationSaga {
         return events$.pipe(
             ofType(AuthUserCreatedEvent),
             map(event => {
-                this.logger.log(`Saga continues: mapping AuthUserCreatedEvent to CreateProfileCommand for user ${event.userId}`);
-                return new CreateProfileCommand(event.userId, event.name, event.lastname, event.age);
+                this.logger.log(`Saga continues: mapping AuthUserCreatedEvent to CreateProfileCommand for user ${event.authId}`);
+                return new CreateProfileCommand(event.profileId, event.authId, event.name, event.lastname, event.age);
             }),
         );
     }
@@ -27,8 +27,8 @@ export class RegistrationSaga {
         return events$.pipe(
             ofType(ProfileCreationFailedEvent),
             map(event => {
-                this.logger.warn(`Saga compensates: mapping ProfileCreationFailedEvent to DeleteAuthUserCommand for user ${event.userId}`);
-                return new DeleteAuthUserCommand(event.userId);
+                this.logger.warn(`Saga compensates: mapping ProfileCreationFailedEvent to DeleteAuthUserCommand for user ${event.authId}`);
+                return new DeleteAuthUserCommand(event.authId);
             })
         );
     }

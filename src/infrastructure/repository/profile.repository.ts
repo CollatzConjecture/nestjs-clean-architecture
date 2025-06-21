@@ -1,4 +1,3 @@
-import { CreateProfileDto } from '@application/dto/create-profile.dto';
 import { PROFILE_MODEL_PROVIDER } from '@constants';
 import { Profile } from '@domain/entities/Profile';
 import { Profile as ProfileModel } from '@infrastructure/models/profile.model';

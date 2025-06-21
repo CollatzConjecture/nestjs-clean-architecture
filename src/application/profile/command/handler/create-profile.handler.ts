@@ -15,8 +15,8 @@ export class CreateProfileHandler implements ICommandHandler<CreateProfileComman
     ) {}
 
     async execute(command: CreateProfileCommand): Promise<void> {
-        this.logger.log(`Handling CreateProfileCommand for user ${command.userId}`);
-        const { userId, name, lastname, age } = command;
+        this.logger.log(`Handling CreateProfileCommand for user ${command.authId}`);
+        const { authId, profileId, name, lastname, age } = command;
 
         const user = this.publisher.mergeObjectContext(
             new UserAggregate()
@@ -29,18 +29,19 @@ export class CreateProfileHandler implements ICommandHandler<CreateProfileComman
             }
     
             await this.profileRepository.create({
-                id: userId,
+                id: profileId,
+                authId,
                 name,
                 lastname,
                 age
             });
 
-            this.logger.log(`Profile for user ${userId} created successfully.`);
+            this.logger.log(`Profile for user ${profileId} created successfully.`);
             // Optionally, you could publish a ProfileCreatedSuccessEvent here
             
         } catch (error) {
-            this.logger.error(`Failed to create profile for user ${userId}`, error.stack);
-            user.apply(new ProfileCreationFailedEvent(userId, error));
+            this.logger.error(`Failed to create profile for user ${profileId}`, error.stack);
+            user.apply(new ProfileCreationFailedEvent(profileId, error));
         } finally {
             user.commit();
         }

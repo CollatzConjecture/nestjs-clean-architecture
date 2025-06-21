@@ -1,43 +1,41 @@
-import { Injectable, UnauthorizedException, Logger, ConflictException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { ProfileService } from './profile.service';
-import { RegisterAuthDto } from '@application/dto/auth/register-auth.dto';
-import { Profile } from '@domain/entities/Profile';
-import { AuthRepository } from '@infrastructure/repository/auth.repository';
-import { v4 } from 'uuid';
-import { AuthUser } from '@domain/entities/Auth';
-import { CommandBus } from '@nestjs/cqrs';
 import { CreateAuthUserCommand } from '@application/auth/command/create-auth-user.command';
 import { LoginAuthDto } from '@application/dto/auth/login-auth.dto';
+import { RegisterAuthDto } from '@application/dto/auth/register-auth.dto';
+import { Auth } from '@infrastructure/models/auth.model';
+import { Profile } from '@domain/entities/Profile';
+import { AuthRepository } from '@infrastructure/repository/auth.repository';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { v4 } from 'uuid';
+import { LoggerService } from './logger.service';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
+  private readonly logger: LoggerService = new LoggerService('AuthService');
 
   constructor(
     private readonly commandBus: CommandBus,
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
-    private readonly profileService: ProfileService,
   ) {}
 
-  async register(registerDto: RegisterAuthDto): Promise<{ message: string; userId: string }> {
-    const userId = v4();
+  async register(registerDto: RegisterAuthDto): Promise<{ message: string; authId: string; profileId: string }> {
+    const authId = "auth-" + v4();
+    const profileId = "profile-" + v4();
     await this.commandBus.execute(
-      new CreateAuthUserCommand(registerDto, userId)
+      new CreateAuthUserCommand(registerDto, authId, profileId)
     );
     
-    this.logger.log(`Registration process started for user ${userId}.`);
-    return { message: 'Registration process started.', userId };
+    this.logger.logger(`Registration process started for user ${authId}.`);
+    return { message: 'Registration process started.', authId, profileId };
   }
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(email: string, pass: string): Promise<Auth | null> {
     const auth = await this.authRepository.findByEmail(email, true);
-    
     if (auth && await bcrypt.compare(pass, auth.password)) {
-      const user = await this.profileService.findById(auth.id);
-      return user;
+      return auth;
     }
     return null;
   }
@@ -61,5 +59,13 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async findByAuthId(authId: string): Promise<Profile | null> {
+    const auth = await this.authRepository.findByAuthId(authId);
+    if (!auth) {
+      return null;
+    }
+    return auth.toObject();
   }
 } 
