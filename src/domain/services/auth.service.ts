@@ -13,7 +13,7 @@ import { LoggerService } from './logger.service';
 
 @Injectable()
 export class AuthService {
-  private readonly logger: LoggerService = new LoggerService('AuthService');
+  private readonly logger: LoggerService = new LoggerService('AuthController');
 
   constructor(
     private readonly commandBus: CommandBus,

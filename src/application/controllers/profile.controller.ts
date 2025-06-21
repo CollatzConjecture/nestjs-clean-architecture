@@ -13,7 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 @Controller('profile')
 @UseInterceptors(LoggingInterceptor)
 export class ProfileController {
-  private Log: LoggerService = new LoggerService('createOperation');
+  private Log: LoggerService = new LoggerService('ProfileController');
   constructor(private readonly profileService: ProfileService) {}
 
   @Get('all')

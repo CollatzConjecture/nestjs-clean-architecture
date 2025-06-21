@@ -6,7 +6,7 @@ moduleAlias.addAliases({
   '@domain': path.resolve(__dirname, 'domain'),
   '@application': path.resolve(__dirname, 'application'),
   '@infrastructure': path.resolve(__dirname, 'infrastructure'),
-  '@constants': path.format({dir: __dirname, name: 'constants'}),
+  '@constants': path.format({ dir: __dirname, name: 'constants' }),
 });
 
 // App modules
@@ -18,8 +18,11 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
-
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true, // strips properties not in the DTO
+    forbidNonWhitelisted: true, // throws error if extra properties are present
+  }));
+  
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('NestJS Clean Architecture API')
