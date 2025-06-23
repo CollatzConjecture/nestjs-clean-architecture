@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { Auth } from '@infrastructure/models/auth.model';
+import { Auth, createBlindIndex } from '@infrastructure/models/auth.model';
 import { AUTH_MODEL_PROVIDER } from '@constants';
 
 @Injectable()
@@ -13,7 +13,8 @@ export class AuthRepository {
   }
 
   async findByEmail(email: string, withPassword?: boolean): Promise<Auth> {
-    const query = this.authModel.findOne({ email });
+    const emailHash = createBlindIndex(email);
+    const query = this.authModel.findOne({ emailHash });
     if (withPassword) {
       query.select('+password');
     }

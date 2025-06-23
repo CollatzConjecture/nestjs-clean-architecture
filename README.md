@@ -1,6 +1,6 @@
-# NestJS Clean Architecture with CQRS & Event Sourcing
+# NestJS Clean Architecture with DDD, CQRS & Event Sourcing
 
-This is an advanced boilerplate project implementing **Domain-Driven Design (DDD)**, **Clean Architecture**, **CQRS (Command Query Responsibility Segregation)**, and **Event Sourcing** with NestJS.
+This is an advanced boilerplate project implementing **Domain-Driven Design (DDD)**, **Clean Architecture**, **CQRS (Command Query Responsibility Segregation)**, and **Event Sourcing** with NestJS. It provides a robust foundation for building scalable and maintainable enterprise-level applications.
 
 If you want more documentation about NestJS, click here [Nest](https://github.com/nestjs/nest) 
 
@@ -10,38 +10,33 @@ If you want more documentation about NestJS, click here [Nest](https://github.co
 
 ## 🚀 Features
 
-### Architecture Patterns
-- **Clean Architecture** - Separation of concerns with clear boundaries
-- **Domain-Driven Design (DDD)** - Business logic encapsulation
-- **CQRS** - Command Query Responsibility Segregation
-- **Event Sourcing** - Event-driven architecture with sagas
-- **Aggregate Pattern** - Domain aggregates for consistency
+### Core Architecture
+- **Clean Architecture**: Enforces separation of concerns with Domain, Application, and Infrastructure layers.
+- **Domain-Driven Design (DDD)**: Encapsulates complex business logic using Aggregates and Domain Events.
+- **CQRS**: Segregates read (Queries) and write (Commands) operations for optimized performance and scalability.
+- **Event Sourcing**: Uses an event-driven approach with sagas for orchestrating complex business processes.
+- **Aggregate Pattern**: Ensures data consistency and enforces business rules within domain aggregates.
 
-### Authentication & Authorization
-- **JWT Authentication** - Secure token-based authentication
-- **User Registration & Login** - Complete auth flow
-- **Protected Routes** - JWT-based route protection
-- **Password Hashing** - Secure password storage with bcrypt
+### Security
+- **JWT Authentication**: Implements secure, token-based authentication with refresh token rotation.
+- **Role-Based Access Control (RBAC) Foundation**: Includes protected routes and strategies, ready for role implementation.
+- **Secure Password Storage**: Hashes passwords using `bcrypt`.
+- **Sensitive Data Encryption**: Encrypts sensitive fields (e.g., user emails) at rest in the database using AES-256-CBC.
+- **Blind Indexing**: Allows for securely querying encrypted data without decrypting it first.
 
-### Event-Driven Architecture
-- **Event Handlers** - Domain event processing
-- **Sagas** - Complex business process orchestration
-- **Event Publishing** - Domain events with aggregate roots
-- **Compensating Transactions** - Error handling and rollback
-
-### Infrastructure
-- **MongoDB Integration** - Document database with Mongoose
-- **Health Checks** - Application health monitoring
-- **Logging Middleware** - Request/response logging
-- **Metrics Collection** - Prometheus integration
-- **Data Visualization** - Grafana dashboards
-- **Docker Support** - Containerized deployment
+### Infrastructure & Operations
+- **MongoDB Integration**: Utilizes Mongoose for structured data modeling with a NoSQL database.
+- **Containerized Environment**: Full Docker and Docker Compose setup for development and production.
+- **Health Checks**: Provides application health monitoring endpoints via Terminus.
+- **Logging**: Includes a middleware for detailed request/response logging.
+- **Application Metrics**: Exposes performance metrics for Prometheus.
+- **Data Visualization**: Comes with a pre-configured Grafana dashboard for visualizing metrics.
 
 ### Testing
-- **Unit Tests** - Service and controller testing
-- **E2E Tests** - End-to-end integration testing
-- **Test Coverage** - Code coverage reporting
-- **Mocking** - Database and service mocking
+- **Unit & Integration Tests**: A suite of tests for domain, application, and infrastructure layers.
+- **E2E Tests**: End-to-end tests to ensure API functionality from request to response.
+- **High Test Coverage**: Configured to report and maintain high code coverage.
+- **Mocking**: Clear patterns for mocking database and service dependencies.
 
 ## Getting Started
 
@@ -122,10 +117,10 @@ cd nestjs-clean-architecture
 ## 🏗️ Architecture Overview
 
 ### CQRS Implementation
-- **Commands**: Handle write operations (Create, Update, Delete)
-- **Queries**: Handle read operations (Find, Get)
-- **Handlers**: Process commands and queries separately
-- **Events**: Publish domain events for side effects
+- **Commands**: Handle write operations (Create, Update, Delete). Located in `src/application/*/command`.
+- **Queries**: Handle read operations (Find, Get). Located in `src/application/*/query`.
+- **Handlers**: Process commands and queries separately.
+- **Events**: Publish domain events for side effects and inter-module communication.
 
 ### Event-Driven Flow
 1. **User Registration**:
@@ -153,23 +148,23 @@ cd nestjs-clean-architecture
 
 ## 🐳 Running with Docker Compose
 
-The project includes multiple Docker Compose configurations:
+The project is configured to run seamlessly with Docker. Use the npm scripts from `package.json` for convenience.
 
 ```bash
-# Development environment
-$ docker:dev
+# Build and start containers in detached mode for development
+$ npm run docker:dev
 
-# Production environment
-$ docker:prod
+# Build and start containers for production
+$ npm run docker:prod
 
-# Default environment
-$ docker-compose up -d
+# View logs for the API service
+$ npm run docker:logs
 
-# View logs
-$ docker-compose logs -f
+# Stop all running containers
+$ npm run docker:down
 
-# Stop all services
-$ docker-compose down
+# Restart the development environment
+$ npm run docker:restart
 ```
 
 ### 🌐 Service Access
@@ -227,11 +222,12 @@ POST /auth/refresh-token # Token refresh
 
 ### Profile Management (Protected)
 ```http
-GET  /profile         # Get user profile
-GET  /all            # Get all profiles
-GET  /hello          # Health check
-POST /               # Create profile
+GET  /profile         # Get current user's profile
+GET  /profile/all     # Get all user profiles (Requires Admin Role)
+GET  /hello           # Health check
+POST /profile         # Create a new profile
 ```
+**Note**: Endpoints like `/profile/all` are intended for administrative use and should be protected with a Role-Based Access Control (RBAC) guard in a production environment.
 
 ### Example Usage
 ```bash
@@ -351,3 +347,32 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [CQRS Pattern](https://martinfowler.com/bliki/CQRS.html)
 - [Event Sourcing](https://martinfowler.com/eaaDev/EventSourcing.html)
 - [NestJS Documentation](https://docs.nestjs.com/)
+
+## ⚙️ Configuration
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/CollatzConjecture/nestjs-clean-architecture
+    cd nestjs-clean-architecture
+    ```
+
+2.  **Create an environment file:**
+
+    Create a file named `.env` in the root of the project by copying the example file.
+    ```bash
+    cp .env.example .env
+    ```
+
+3.  **Generate Secrets:**
+
+    Your `.env` file requires several secret keys to run securely. Use the following command to generate a cryptographically strong secret:
+    ```bash
+    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+    ```
+    Run this command for each of the following variables in your `.env` file and paste the result:
+    - `JWT_SECRET`
+    - `JWT_REFRESH_SECRET`
+    - `EMAIL_ENCRYPTION_KEY`
+    - `EMAIL_BLIND_INDEX_SECRET`
+
+    **Do not use the same value for different keys.**

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request, Get, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get, UseInterceptors, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '@domain/services/auth.service';
 import { RegisterAuthDto } from '../dto/auth/register-auth.dto';
@@ -36,5 +36,15 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async refreshToken(@Request() req) {
     return this.authService.refreshToken(req.user);
+  }
+
+  @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get user profile by auth id' })
+  @ApiResponse({ status: 200, description: 'Returns user profile.'})
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async getProfile(@Param('id') id: string) {
+    return this.authService.findByAuthId(id);
   }
 } 

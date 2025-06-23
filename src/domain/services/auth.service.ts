@@ -2,7 +2,6 @@ import { CreateAuthUserCommand } from '@application/auth/command/create-auth-use
 import { LoginAuthDto } from '@application/dto/auth/login-auth.dto';
 import { RegisterAuthDto } from '@application/dto/auth/register-auth.dto';
 import { Auth } from '@infrastructure/models/auth.model';
-import { Profile } from '@domain/entities/Profile';
 import { AuthRepository } from '@infrastructure/repository/auth.repository';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -61,11 +60,11 @@ export class AuthService {
     };
   }
 
-  async findByAuthId(authId: string): Promise<Profile | null> {
+  async findByAuthId(authId: string): Promise<Auth | null> {
     const auth = await this.authRepository.findByAuthId(authId);
     if (!auth) {
       return null;
     }
-    return auth.toObject();
+    return auth;
   }
 } 
