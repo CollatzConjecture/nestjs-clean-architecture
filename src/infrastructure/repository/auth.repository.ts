@@ -22,12 +22,16 @@ export class AuthRepository {
     return auth ? auth.toObject() : null;
   }
 
-  async delete(id: string): Promise<void> {
-    await this.authModel.findByIdAndDelete(id).exec();
+  async deleteById(id: string): Promise<void> {
+    await this.authModel.findOneAndDelete({ id }).exec();
   }
 
-  async findByAuthId(authId: string): Promise<Auth> {
-    const query = this.authModel.findOne({ id: authId });
+  async findById(id: string): Promise<Auth> {
+    const query = this.authModel.findOne({ id });
     return await query.exec();
+  }
+
+  async removeRefreshToken(id: string): Promise<void> {
+    await this.authModel.updateOne({ id }, { currentHashedRefreshToken: null }).exec();
   }
 }

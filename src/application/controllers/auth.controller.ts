@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request, Get, UseInterceptors, Param } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get, UseInterceptors, Param, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '@domain/services/auth.service';
 import { RegisterAuthDto } from '@application/dto/auth/register-auth.dto';
@@ -32,6 +32,16 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Post('logout')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Log out the current user' })
+  @ApiResponse({ status: 200, description: 'User successfully logged out.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async logout(@Request() req) {
+    return this.authService.logout(req.user.id);
+  }
+
   @Post('refresh-token')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
@@ -50,5 +60,15 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async getProfile(@Param('id') id: string) {
     return this.authService.findByAuthId(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete user profile by auth id' })
+  @ApiResponse({ status: 200, description: 'User profile deleted.'})
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async deleteProfile(@Param('id') id: string) {
+    return this.authService.deleteByAuthId(id);
   }
 } 

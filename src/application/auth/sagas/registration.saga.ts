@@ -6,6 +6,8 @@ import { AuthUserCreatedEvent } from '../events/auth-user-created.event';
 import { CreateProfileCommand } from '@application/profile/command/create-profile.command';
 import { DeleteAuthUserCommand } from '../command/delete-auth-user.command';
 import { ProfileCreationFailedEvent } from '@application/profile/events/profile-creation-failed.event';
+import { AuthUserDeletedEvent } from '../events/auth-user-deleted.event';
+import { DeleteProfileCommand } from '@application/profile/command/delete-profile.command';
 
 @Injectable()
 export class RegistrationSaga {
@@ -28,8 +30,19 @@ export class RegistrationSaga {
             ofType(ProfileCreationFailedEvent),
             map(event => {
                 this.logger.warn(`Saga compensates: mapping ProfileCreationFailedEvent to DeleteAuthUserCommand for user ${event.authId}`);
-                return new DeleteAuthUserCommand(event.authId);
+                return new DeleteAuthUserCommand(event.authId, event.profileId);
             })
+        );
+    }
+
+    @Saga()
+    userDeleted = (events$: Observable<any>): Observable<ICommand> => {
+        return events$.pipe(
+            ofType(AuthUserDeletedEvent),
+            map(event => {
+                this.logger.log(`Saga continues: mapping AuthUserDeletedEvent to DeleteProfileCommand for profile ${event.profileId}`);
+                return new DeleteProfileCommand(event.profileId);
+            }),
         );
     }
 } 

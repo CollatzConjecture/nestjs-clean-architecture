@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { EMAIL_BLIND_INDEX_SECRET, EMAIL_ENCRYPTION_KEY } from '@constants';
+import { Role } from '@domain/entities/enums/role.enum';
 
 const ALGORITHM = 'aes-256-cbc';
 const IV_LENGTH = 16;
@@ -46,6 +47,7 @@ export const AuthSchema = new mongoose.Schema({
     },
     emailHash: { type: String, unique: true, index: true, sparse: true },
     password: { type: String, required: true, select: false },
+    role: { type: [String], required: true, enum: Role, default: [Role.USER] },
     currentHashedRefreshToken: { type: String, select: false },
 }, {
     toJSON: { getters: true },
@@ -71,6 +73,7 @@ AuthSchema.pre('save', async function (next) {
 export interface Auth extends mongoose.Document {
     readonly id: string;
     readonly email: string;
+    readonly role: Role;
     readonly emailHash?: string;
     readonly password?: string;
     readonly currentHashedRefreshToken?: string;

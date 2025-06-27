@@ -31,4 +31,10 @@ export class ProfileService {
     this.Log.logger(`Fetching profile for id: ${id}`, context);
     return this.queryBus.execute(new FindProfileByIdQuery(id));
   }
+
+  async findByRole(role: string): Promise<Profile[]> {
+    const context: Context = { module: 'ProfileService', method: 'findByRole' };
+    this.Log.logger(`Fetching profiles with role: ${role}`, context);
+    return this.repository.findProfilesByRole(role);
+  }
 }

@@ -6,6 +6,9 @@ import { Profile } from '@domain/entities/Profile';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '@application/auth/decorators/roles.decorator';
+import { Role } from '@domain/entities/enums/role.enum';
+import { RolesGuard } from '@application/auth/guards/roles.guard';
 
 @ApiTags('profile')
 @ApiBearerAuth()
@@ -17,19 +20,31 @@ export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
   @Get('all')
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Returns all users', type: [Profile] })
   async getAll(): Promise<Profile[]> {
-    const context: Context = { module: 'HelloController', method: 'getAll' };
-    this.Log.logger('Hello World!', context);
+    const context: Context = { module: 'ProfileController', method: 'getAll' };
+    this.Log.logger('Getting All Profiles!', context);
     return await this.profileService.find();
+  }
+
+  @Get('admins')
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiOperation({ summary: 'Get all admin users' })
+  @ApiResponse({ status: 200, description: 'Returns all admin users', type: [Profile] })
+  async getAdmins(): Promise<Profile[]> {
+    const context: Context = { module: 'ProfileController', method: 'getAdmins' };
+    this.Log.logger('Getting All Admin Profiles!', context);
+    return await this.profileService.findByRole(Role.ADMIN);
   }
 
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, description: 'The user has been successfully created', type: Profile })
   @Post('')
   async create(@Body() profile: CreateProfileDto): Promise<Profile> {
-    const context: Context = { module: 'HelloController', method: 'create' };
+    const context: Context = { module: 'ProfileController', method: 'create' };
     this.Log.logger(profile, context);
     return await this.profileService.create(profile);
   }

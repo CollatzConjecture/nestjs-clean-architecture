@@ -40,4 +40,5 @@ export const CommandHandlers = [CreateAuthUserHandler, DeleteAuthUserHandler];
   ],
   exports: [AuthService],
 })
+
 export class AuthModule {} 

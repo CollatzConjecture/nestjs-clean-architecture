@@ -23,4 +23,40 @@ export class ProfileRepository {
     const profile = await this.profileModel.findOne({ id }).exec();
     return profile ? profile.toObject() as Profile : null;
   }
+
+  async findByAuthId(authId: string): Promise<Profile | null> {
+    const profile = await this.profileModel.findOne({ authId }).exec();
+    return profile ? profile.toObject() as Profile : null;
+  }
+
+  async findProfilesByRole(role: string): Promise<Profile[]> {
+    const profiles = await this.profileModel.aggregate([
+      {
+        $lookup: {
+          from: 'auths', // The name of the collection for the Auth model
+          localField: 'authId',
+          foreignField: 'id',
+          as: 'authDetails'
+        }
+      },
+      {
+        $unwind: '$authDetails'
+      },
+      {
+        $match: {
+          'authDetails.role': role
+        }
+      },
+      {
+        $project: {
+          authDetails: 0 // Exclude the joined auth details from the final result
+        }
+      }
+    ]).exec();
+    return profiles;
+  }
+
+  async deleteById(id: string): Promise<void> {
+    await this.profileModel.deleteOne({ id }).exec();
+  }
 }
