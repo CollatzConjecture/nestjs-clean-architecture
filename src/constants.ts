@@ -26,8 +26,14 @@ export const JWT_EXPIRATION_TIME = process.env.JWT_EXPIRATION_TIME || '3600s';
 export const JWT_REFRESH_EXPIRATION_TIME = process.env.JWT_REFRESH_EXPIRATION_TIME || '7d';
 
 // Encryption Constants
-export const EMAIL_ENCRYPTION_KEY = process.env.EMAIL_ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex').slice(0, 32);
-export const EMAIL_BLIND_INDEX_SECRET = process.env.EMAIL_BLIND_INDEX_SECRET || crypto.randomBytes(32).toString('hex');
+if (!process.env.EMAIL_ENCRYPTION_KEY) {
+  throw new Error('FATAL ERROR: EMAIL_ENCRYPTION_KEY is not defined in environment variables.');
+}
+if (!process.env.EMAIL_BLIND_INDEX_SECRET) {
+  throw new Error('FATAL ERROR: EMAIL_BLIND_INDEX_SECRET is not defined in environment variables.');
+}
+export const EMAIL_ENCRYPTION_KEY = process.env.EMAIL_ENCRYPTION_KEY;
+export const EMAIL_BLIND_INDEX_SECRET = process.env.EMAIL_BLIND_INDEX_SECRET;
 
 // Grafana Constants
 export const GRAFANA_USER = process.env.GRAFANA_USER || 'admin';

@@ -9,9 +9,14 @@ import { AuthModule } from './application/auth/auth.module';
 import { ProfileModule } from './application/profile/profile.module';
 import { ProfileController } from './application/controllers/profile.controller';
 import { HelloController } from './application/controllers/hello.controller';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100,
+    }]),
     AuthModule,
     ProfileModule,
     DatabaseModule,

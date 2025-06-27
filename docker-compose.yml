@@ -3,7 +3,7 @@ services:
     image: mongo:latest
     container_name: nestjs-mongodb
     ports:
-      - "${MONGO_PORT}:${MONGO_PORT}"
+      - "${MONGO_PORT}:27017"
     volumes:
       - mongodb_data:/data/db
     networks:
@@ -13,7 +13,7 @@ services:
     image: prom/prometheus:latest
     container_name: nestjs-prometheus
     ports:
-      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+      - "${PROMETHEUS_PORT}:9090"
     volumes:
       - ./prometheus:/etc/prometheus
       - prometheus_data:/prometheus
@@ -29,7 +29,7 @@ services:
     image: grafana/grafana:latest
     container_name: nestjs-grafana
     ports:
-      - "${GRAFANA_PORT}:${GRAFANA_PORT}"
+      - "${GRAFANA_PORT}:3000"
     volumes:
       - grafana_data:/var/lib/grafana
     environment:

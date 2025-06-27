@@ -11,6 +11,8 @@ services:
     ports:
       - "${APP_PORT}:${APP_PORT}"
       - "9229:9229"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=development
       - MONGODB_URI=${MONGODB_URI}

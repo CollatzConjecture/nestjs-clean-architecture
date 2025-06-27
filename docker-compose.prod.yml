@@ -7,6 +7,8 @@ services:
     command: npm run start:prod
     ports:
       - "${APP_PORT}:${APP_PORT}"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - MONGODB_URI=${MONGODB_URI}
