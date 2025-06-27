@@ -1,4 +1,5 @@
 import { PROFILE_MODEL_PROVIDER } from '@constants';
+import { Role } from '@domain/entities/enums/role.enum';
 import { Profile } from '@domain/entities/Profile';
 import { Profile as ProfileModel } from '@infrastructure/models/profile.model';
 import { Inject, Injectable } from '@nestjs/common';
@@ -29,7 +30,7 @@ export class ProfileRepository {
     return profile ? profile.toObject() as Profile : null;
   }
 
-  async findProfilesByRole(role: string): Promise<Profile[]> {
+  async findProfilesByRole(role: Role): Promise<Profile[]> {
     const profiles = await this.profileModel.aggregate([
       {
         $lookup: {

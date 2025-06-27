@@ -24,14 +24,16 @@ async function bootstrap() {
   }));
   
   // Swagger configuration
+  if (process.env.NODE_ENV !== 'production') {
   const config = new DocumentBuilder()
     .setTitle('NestJS Clean Architecture API')
     .setDescription('The NestJS Clean Architecture API description')
     .setVersion('1.0')
     .addTag('users')
     .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
 
   await app.listen(APP_PORT);
   console.log('Running on port ==> ', APP_PORT);

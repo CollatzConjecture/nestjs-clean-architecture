@@ -14,7 +14,7 @@ import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Throttle({ default: { limit: 5, ttl: 6000000 } })
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User successfully registered.'})
@@ -32,8 +32,8 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  @Post('logout')
   @UseGuards(AuthGuard('jwt'))
+  @Post('logout')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Log out the current user' })
   @ApiResponse({ status: 200, description: 'User successfully logged out.' })
@@ -42,8 +42,8 @@ export class AuthController {
     return this.authService.logout(req.user.id);
   }
 
-  @Post('refresh-token')
   @UseGuards(AuthGuard('jwt'))
+  @Post('refresh-token')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, description: 'New access token generated.'})
@@ -52,8 +52,8 @@ export class AuthController {
     return this.authService.refreshToken(req.user);
   }
 
-  @Get(':id')
   @UseGuards(AuthGuard('jwt'))
+  @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user profile by auth id' })
   @ApiResponse({ status: 200, description: 'Returns user profile.'})
@@ -62,8 +62,8 @@ export class AuthController {
     return this.authService.findByAuthId(id);
   }
 
-  @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
+  @Delete(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete user profile by auth id' })
   @ApiResponse({ status: 200, description: 'User profile deleted.'})

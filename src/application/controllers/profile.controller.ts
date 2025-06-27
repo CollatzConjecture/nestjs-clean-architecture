@@ -19,8 +19,9 @@ export class ProfileController {
   private Log: LoggerService = new LoggerService('ProfileController');
   constructor(private readonly profileService: ProfileService) {}
 
-  @Get('all')
   @Roles(Role.ADMIN)
+  @UseGuards(RolesGuard)
+  @Get('all')
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Returns all users', type: [Profile] })
   async getAll(): Promise<Profile[]> {
@@ -29,9 +30,9 @@ export class ProfileController {
     return await this.profileService.find();
   }
 
-  @Get('admins')
   @Roles(Role.ADMIN)
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseGuards(RolesGuard)
+  @Get('admins')
   @ApiOperation({ summary: 'Get all admin users' })
   @ApiResponse({ status: 200, description: 'Returns all admin users', type: [Profile] })
   async getAdmins(): Promise<Profile[]> {
@@ -40,9 +41,9 @@ export class ProfileController {
     return await this.profileService.findByRole(Role.ADMIN);
   }
 
+  @Post('')
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, description: 'The user has been successfully created', type: Profile })
-  @Post('')
   async create(@Body() profile: CreateProfileDto): Promise<Profile> {
     const context: Context = { module: 'ProfileController', method: 'create' };
     this.Log.logger(profile, context);
@@ -50,7 +51,6 @@ export class ProfileController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Get user profile' })
   @ApiResponse({ status: 200, description: 'Returns user profile.'})
   @ApiResponse({ status: 401, description: 'Unauthorized.' })

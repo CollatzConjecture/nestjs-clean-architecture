@@ -6,6 +6,7 @@ import { QueryBus } from '@nestjs/cqrs';
 import { FindProfilesQuery } from '@application/profile/query/find-profiles.query';
 import { FindProfileByIdQuery } from '@application/profile/query/find-profile-by-id.query';
 import { LoggerService, Context } from '@domain/services/logger.service';
+import { Role } from '@domain/entities/enums/role.enum';
 
 @Injectable()
 export class ProfileService {
@@ -32,7 +33,7 @@ export class ProfileService {
     return this.queryBus.execute(new FindProfileByIdQuery(id));
   }
 
-  async findByRole(role: string): Promise<Profile[]> {
+  async findByRole(role: Role): Promise<Profile[]> {
     const context: Context = { module: 'ProfileService', method: 'findByRole' };
     this.Log.logger(`Fetching profiles with role: ${role}`, context);
     return this.repository.findProfilesByRole(role);
