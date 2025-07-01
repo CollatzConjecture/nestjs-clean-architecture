@@ -40,13 +40,14 @@ export const createBlindIndex = (text: string): string => {
 
 export const AuthSchema = new mongoose.Schema({
     id: { type: String, required: true },
+    googleId: { type: String, unique: true, sparse: true },
     email: {
         type: String,
         required: true,
         get: decrypt,
     },
     emailHash: { type: String, unique: true, index: true, sparse: true },
-    password: { type: String, required: true, select: false },
+    password: { type: String, required: false, select: false },
     role: { type: [String], required: true, enum: Role, default: [Role.USER] },
     currentHashedRefreshToken: { type: String, select: false },
 }, {
@@ -55,7 +56,7 @@ export const AuthSchema = new mongoose.Schema({
 });
 
 AuthSchema.pre('save', async function (next) {
-    if (this.isModified('password')) {
+    if (this.isModified('password') && this.password) {
         this.password = await bcrypt.hash(this.password, 10);
     }
 
@@ -72,8 +73,9 @@ AuthSchema.pre('save', async function (next) {
 
 export interface Auth extends mongoose.Document {
     readonly id: string;
+    googleId?: string;
     readonly email: string;
-    readonly role: Role;
+    readonly role: Role[];
     readonly emailHash?: string;
     readonly password?: string;
     readonly currentHashedRefreshToken?: string;

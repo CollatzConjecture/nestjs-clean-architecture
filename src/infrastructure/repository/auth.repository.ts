@@ -19,7 +19,7 @@ export class AuthRepository {
       query.select('+password');
     }
     const auth = await query.exec();
-    return auth ? auth.toObject() : null;
+    return auth;
   }
 
   async deleteById(id: string): Promise<void> {
@@ -28,6 +28,11 @@ export class AuthRepository {
 
   async findById(id: string): Promise<Auth> {
     const query = this.authModel.findOne({ id });
+    return await query.exec();
+  }
+
+  async findByGoogleId(googleId: string): Promise<Auth> {
+    const query = this.authModel.findOne({ googleId });
     return await query.exec();
   }
 

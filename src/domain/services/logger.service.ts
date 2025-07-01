@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { APP_HOST } from '@constants';
 
 export class Context {
@@ -6,6 +6,7 @@ export class Context {
   method: string;
 }
 
+@Injectable()
 export class LoggerService extends Logger {
   logger(message: any, context?: Context) {
     const standard = {server: APP_HOST, type: 'INFO', time: Date.now()};

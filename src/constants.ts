@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import * as crypto from 'crypto';
+
 dotenv.config();
 
 // Database Constants
@@ -24,6 +24,11 @@ export const JWT_SECRET = process.env.JWT_SECRET || 'your-default-secret';
 export const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-default-refresh-secret';
 export const JWT_EXPIRATION_TIME = process.env.JWT_EXPIRATION_TIME || '3600s';
 export const JWT_REFRESH_EXPIRATION_TIME = process.env.JWT_REFRESH_EXPIRATION_TIME || '7d';
+
+// Google OAuth Constants
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
 
 // Encryption Constants
 if (!process.env.EMAIL_ENCRYPTION_KEY) {

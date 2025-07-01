@@ -10,32 +10,32 @@ import { Role } from '@domain/entities/enums/role.enum';
 
 @Injectable()
 export class ProfileService {
-  private Log: LoggerService = new LoggerService('ProfileService');
-
   constructor(
     private readonly repository: ProfileRepository,
     private readonly queryBus: QueryBus,
+    private readonly logger: LoggerService,
   ) {}
 
   async create(createProfileDto: CreateProfileDto): Promise<Profile> {
+    this.logger.logger(`Creating profile.`, { module: 'ProfileService', method: 'create' });
     return await this.repository.create(createProfileDto);
   }
 
   async find(): Promise<Profile[]> {
     const context: Context = { module: 'ProfileService', method: 'find' };
-    this.Log.logger('Fetching all profiles', context);
+    this.logger.logger('Fetching all profiles', context);
     return this.queryBus.execute(new FindProfilesQuery());
   }
 
   async findById(id: string): Promise<Profile | null> {
     const context: Context = { module: 'ProfileService', method: 'findById' };
-    this.Log.logger(`Fetching profile for id: ${id}`, context);
+    this.logger.logger(`Fetching profile for id: ${id}`, context);
     return this.queryBus.execute(new FindProfileByIdQuery(id));
   }
 
   async findByRole(role: Role): Promise<Profile[]> {
     const context: Context = { module: 'ProfileService', method: 'findByRole' };
-    this.Log.logger(`Fetching profiles with role: ${role}`, context);
+    this.logger.logger(`Fetching profiles with role: ${role}`, context);
     return this.repository.findProfilesByRole(role);
   }
 }

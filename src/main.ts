@@ -12,25 +12,27 @@ moduleAlias.addAliases({
 // App modules
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { APP_PORT } from './constants';
+import { APP_PORT } from '@constants';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({
-    whitelist: true, // strips properties not in the DTO
-    forbidNonWhitelisted: true, // throws error if extra properties are present
+    whitelist: true,
+    forbidNonWhitelisted: true,
   }));
+  app.use(cookieParser());
   
   // Swagger configuration
   if (process.env.NODE_ENV !== 'production') {
-  const config = new DocumentBuilder()
-    .setTitle('NestJS Clean Architecture API')
-    .setDescription('The NestJS Clean Architecture API description')
-    .setVersion('1.0')
-    .addTag('users')
-    .build();
+    const config = new DocumentBuilder()
+      .setTitle('NestJS Clean Architecture API')
+      .setDescription('The NestJS Clean Architecture API description')
+      .setVersion('1.0')
+      .addTag('users')
+      .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
   }
