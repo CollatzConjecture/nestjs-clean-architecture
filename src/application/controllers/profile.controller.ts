@@ -1,11 +1,13 @@
 import { Roles } from '@application/auth/decorators/roles.decorator';
 import { RolesGuard } from '@application/auth/guards/roles.guard';
+import { CurrentUserId } from '@application/decorators/current-user.decorator';
 import { CreateProfileDto } from '@application/dto/create-profile.dto';
+import { UpdateProfileDto } from '@application/dto/update-profile.dto';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
+import { ProfileService } from '@application/services/profile.service';
 import { Role } from '@domain/entities/enums/role.enum';
 import { Profile } from '@domain/entities/Profile';
-import { ProfileService } from '@domain/services/profile.service';
-import { BadRequestException, Body, Controller, Get, Param, Post, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Put, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -51,5 +53,16 @@ export class ProfileController {
       throw new BadRequestException('Profile id is required');
     }
     return this.profileService.findById(id);
+  }
+
+  @Put('me')
+  @ApiOperation({ summary: 'Update my profile' })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully', type: Profile })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async updateMyProfile(
+    @Body() updates: UpdateProfileDto,
+    @CurrentUserId() requestingUserId: string,
+  ): Promise<Profile> {
+    return await this.profileService.updateMyProfile(updates, requestingUserId);
   }
 }

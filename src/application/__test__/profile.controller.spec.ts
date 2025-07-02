@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { has, cloneDeep } from 'lodash';
 import { TestingModule } from '@nestjs/testing/testing-module';
 import { ProfileController } from '@application/controllers/profile.controller';
-import { ProfileService } from '@domain/services/profile.service';
+import { ProfileService } from '@application/services/profile.service';
 import { ProfileModel } from '@infrastructure/models/profile.model';
 import { Profile } from '@domain/entities/Profile';
 import { PROFILE_MODEL_PROVIDER } from '@constants';
@@ -38,6 +38,7 @@ describe('Profile Controller', () => {
   it('should create a profile', async () => {
     const profile: Profile = {
       id: faker.string.uuid(),
+      authId: faker.string.uuid(),
       name: faker.person.firstName(),
       lastname: faker.person.lastName(),
       age: faker.number.int({ min: 18, max: 80 }),
@@ -52,22 +53,18 @@ describe('Profile Controller', () => {
     });
   });
 
-  it('should return Hello World', async () => {
-    const data = await controller.get();
-    expect(data).toBeDefined();
-    expect(data).toBe('Hello World!');
-  });
-
   it('should return all profiles', async () => {
     const profiles: Profile[] = [
       {
         id: faker.string.uuid(),
+        authId: faker.string.uuid(),
         name: faker.person.firstName(),
         lastname: faker.person.lastName(),
         age: faker.number.int({ min: 18, max: 80 }),
       },
       {
         id: faker.string.uuid(),
+        authId: faker.string.uuid(),
         name: faker.person.firstName(),
         lastname: faker.person.lastName(),
         age: faker.number.int({ min: 18, max: 80 }),

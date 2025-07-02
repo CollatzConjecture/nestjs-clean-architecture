@@ -1,12 +1,13 @@
 import { PROFILE_MODEL_PROVIDER } from '@constants';
-import { Role } from '@domain/entities/enums/role.enum';
 import { Profile } from '@domain/entities/Profile';
+import { Role } from '@domain/entities/enums/role.enum';
+import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
 import { Profile as ProfileModel } from '@infrastructure/models/profile.model';
 import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 
 @Injectable()
-export class ProfileRepository {
+export class ProfileRepository implements IProfileRepository {
   constructor(@Inject(PROFILE_MODEL_PROVIDER) private readonly profileModel: Model<ProfileModel>) {}
 
   async create(profile: Partial<Profile>): Promise<Profile> {
@@ -15,7 +16,7 @@ export class ProfileRepository {
     return savedProfile.toObject() as Profile;
   }
 
-  async find(): Promise<Profile[]> {
+  async findAll(): Promise<Profile[]> {
     const profiles = await this.profileModel.find().exec();
     return profiles.map(profile => profile.toObject() as Profile);
   }
@@ -30,11 +31,11 @@ export class ProfileRepository {
     return profile ? profile.toObject() as Profile : null;
   }
 
-  async findProfilesByRole(role: Role): Promise<Profile[]> {
+  async findByRole(role: Role): Promise<Profile[]> {
     const profiles = await this.profileModel.aggregate([
       {
         $lookup: {
-          from: 'auths', // The name of the collection for the Auth model
+          from: 'auths',
           localField: 'authId',
           foreignField: 'id',
           as: 'authDetails'
@@ -50,14 +51,28 @@ export class ProfileRepository {
       },
       {
         $project: {
-          authDetails: 0 // Exclude the joined auth details from the final result
+          authDetails: 0
         }
       }
     ]).exec();
     return profiles;
   }
 
-  async deleteById(id: string): Promise<void> {
+  async update(id: string, profileData: Partial<Profile>): Promise<Profile> {
+    const updatedProfile = await this.profileModel.findOneAndUpdate(
+      { id },
+      { $set: profileData },
+      { new: true }
+    ).exec();
+    
+    if (!updatedProfile) {
+      throw new Error('Profile not found');
+    }
+    
+    return updatedProfile.toObject() as Profile;
+  }
+
+  async delete(id: string): Promise<void> {
     await this.profileModel.deleteOne({ id }).exec();
   }
 }

@@ -1,15 +1,16 @@
-import { CommandHandler, ICommandHandler, EventPublisher } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler, EventBus } from '@nestjs/cqrs';
+import { Inject } from '@nestjs/common';
 import { CreateProfileCommand } from '@application/profile/command/create-profile.command';
-import { ProfileRepository } from '@infrastructure/repository/profile.repository';
+import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
 import { ProfileCreationFailedEvent } from '@application/profile/events/profile-creation-failed.event';
-import { UserAggregate } from '@domain/aggregates/user.aggregate';
 import { LoggerService } from '@domain/services/logger.service';
 
 @CommandHandler(CreateProfileCommand)
 export class CreateProfileHandler implements ICommandHandler<CreateProfileCommand> {
     constructor(
-        private readonly profileRepository: ProfileRepository,
-        private readonly publisher: EventPublisher,
+        @Inject('IProfileRepository')
+        private readonly profileRepository: IProfileRepository,
+        private readonly eventBus: EventBus,
         private readonly logger: LoggerService,
     ) {}
 
@@ -19,15 +20,7 @@ export class CreateProfileHandler implements ICommandHandler<CreateProfileComman
 
         this.logger.logger(`Creating profile ${profileId} for auth user ${authId}`, context);
 
-        const user = this.publisher.mergeObjectContext(
-            new UserAggregate()
-        );
-
         try {
-            if (name.toLowerCase() === 'fail') {
-                throw new Error('Simulated profile creation failure.');
-            }
-    
             await this.profileRepository.create({
                 id: profileId,
                 authId,
@@ -40,9 +33,8 @@ export class CreateProfileHandler implements ICommandHandler<CreateProfileComman
             
         } catch (error) {
             this.logger.err(`Failed to create profile ${profileId} for user ${authId}: ${error.message}`, context);
-            user.apply(new ProfileCreationFailedEvent(authId, profileId, error));
-        } finally {
-            user.commit();
+            
+            await this.eventBus.publish(new ProfileCreationFailedEvent(authId, profileId, error));
         }
     }
 } 

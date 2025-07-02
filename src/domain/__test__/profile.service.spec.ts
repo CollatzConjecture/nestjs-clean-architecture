@@ -1,5 +1,5 @@
 import { PROFILE_MODEL_PROVIDER } from '@constants';
-import { ProfileService } from '@domain/services/profile.service';
+import { ProfileService } from '@application/services/profile.service';
 import { faker } from '@faker-js/faker';
 import { ProfileRepository } from '@infrastructure/repository/profile.repository';
 import { Test } from '@nestjs/testing';
@@ -42,6 +42,7 @@ describe('User Service', () => {
   it('should create a user', async () => {
     const user = {
       id: faker.string.uuid(),
+      authId: faker.string.uuid(),
       name: faker.person.fullName(),
       lastname: faker.person.lastName(),
       age: faker.number.int(),

@@ -1,34 +1,41 @@
-import { CreateAuthUserCommand } from '@application/auth/command/create-auth-user.command';
-import { LoginAuthDto } from '@application/dto/auth/login-auth.dto';
-import { RegisterAuthDto } from '@application/dto/auth/register-auth.dto';
-import { Auth } from '@infrastructure/models/auth.model';
-import { AuthRepository } from '@infrastructure/repository/auth.repository';
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { v4 } from 'uuid';
-import { LoggerService } from './logger.service';
-import { DeleteAuthUserCommand } from '@application/auth/command/delete-auth-user.command';
-import { ProfileRepository } from '@infrastructure/repository/profile.repository';
-import { Role } from '@domain/entities/enums/role.enum';
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL } from '@constants';
 import axios from 'axios';
+import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+
+import { CreateAuthUserCommand } from '@application/auth/command/create-auth-user.command';
+import { DeleteAuthUserCommand } from '@application/auth/command/delete-auth-user.command';
+import { LoginAuthDto } from '@application/dto/auth/login-auth.dto';
+import { RegisterAuthDto } from '@application/dto/auth/register-auth.dto';
+import { GOOGLE_CALLBACK_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '@constants';
+import { AuthUser } from '@domain/entities/Auth';
+import { Role } from '@domain/entities/enums/role.enum';
+import { IAuthRepository } from '@domain/interfaces/repositories/auth-repository.interface';
+import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
+import { AuthDomainService } from '@domain/services/auth-domain.service';
+import { LoggerService } from '@domain/services/logger.service';
+import { ProfileDomainService } from '@domain/services/profile-domain.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly commandBus: CommandBus,
-    private readonly authRepository: AuthRepository,
+    @Inject('IAuthRepository')
+    private readonly authRepository: IAuthRepository,
+    @Inject('IProfileRepository')
+    private readonly profileRepository: IProfileRepository,
     private readonly jwtService: JwtService,
-    private readonly profileRepository: ProfileRepository,
     private readonly logger: LoggerService,
+    private readonly authDomainService: AuthDomainService,
+    private readonly profileDomainService: ProfileDomainService,
   ) {}
 
   async register(registerDto: RegisterAuthDto): Promise<{ message: string; authId: string; profileId: string }> {
-    const authId = "auth-" + v4();
-    const profileId = "profile-" + v4();
+    const authId = this.authDomainService.generateUserId();
+    const profileId = this.profileDomainService.generateProfileId();
+    
     await this.commandBus.execute(
       new CreateAuthUserCommand(registerDto, authId, profileId)
     );
@@ -37,7 +44,11 @@ export class AuthService {
     return { message: 'Registration process started.', authId, profileId };
   }
 
-  async validateUser(email: string, pass: string): Promise<Auth | null> {
+  async validateUser(email: string, pass: string): Promise<AuthUser | null> {
+    if (!this.authDomainService.isEmailValid(email)) {
+      return null;
+    }
+
     const auth = await this.authRepository.findByEmail(email, true);
     if (auth && await bcrypt.compare(pass, auth.password)) {
       return auth;
@@ -49,6 +60,10 @@ export class AuthService {
     const { email, password } = loginDto;
     const context = { module: 'AuthService', method: 'login' };
     this.logger.logger(`Attempting to log in user ${email}.`, context);
+
+    if (!this.authDomainService.isEmailValid(email)) {
+      throw new UnauthorizedException('Invalid email format');
+    }
 
     const auth = await this.authRepository.findByEmail(loginDto.email, true);
 
@@ -79,7 +94,7 @@ export class AuthService {
     };
   }
 
-  async findByAuthId(authId: string): Promise<Auth | null> {
+  async findByAuthId(authId: string): Promise<AuthUser | null> {
     const auth = await this.authRepository.findById(authId);
     if (!auth) {
       this.logger.logger(`User ${authId} not found.`, { module: 'AuthService', method: 'findByAuthId' });
@@ -107,6 +122,7 @@ export class AuthService {
       this.logger.logger(`Invalid state or state mismatch.`, { module: 'AuthService', method: 'handleGoogleRedirect' });
       throw new UnauthorizedException('Invalid state or state mismatch.');
     }
+    
     const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
       code,
       client_id: GOOGLE_CLIENT_ID,
@@ -142,31 +158,36 @@ export class AuthService {
       auth = await this.authRepository.findByEmail(profile.email);
 
       if (auth) {
-        auth.googleId = profile.googleId;
-        await auth.save();
+        auth = await this.authRepository.update(auth.id, {
+          googleId: profile.googleId
+        });
       } else {
-        const authId = "auth-" + v4();
-        const profileId = "profile-" + v4();
+        const canCreate = await this.authDomainService.canCreateUser(profile.email);
+        if (!canCreate) {
+          throw new Error('User already exists with this email');
+        }
 
-        const registerDto = {
-          name: profile.firstName,
-          lastname: profile.lastName,
-          email: profile.email,
-        };
+        // Domain services generate IDs - proper DDD
+        const authId = this.authDomainService.generateUserId();
+        const profileId = this.profileDomainService.generateProfileId();
 
         auth = await this.authRepository.create({
           id: authId,
           googleId: profile.googleId,
           email: profile.email,
+          password: '',
           role: [Role.USER],
         });
 
-        await this.profileRepository.create({
-          id: profileId,
-          authId: authId,
-          name: profile.firstName,
-          lastname: profile.lastName,
-        });
+        if (await this.profileDomainService.canCreateProfile(authId)) {
+          await this.profileRepository.create({
+            id: profileId,
+            authId: authId,
+            name: profile.firstName,
+            lastname: profile.lastName,
+            age: 0,
+          });
+        }
       }
     }
 
@@ -176,10 +197,15 @@ export class AuthService {
 
   async deleteByAuthId(authId: string): Promise<{ message: string }> {
     const auth = await this.authRepository.findById(authId);
+    if (!auth) {
+      this.logger.logger(`Auth user ${authId} not found.`, { module: 'AuthService', method: 'deleteByAuthId' });
+      throw new NotFoundException('Auth user not found');
+    }
+
     const profile = await this.profileRepository.findByAuthId(auth.id);
-    if (!auth || !profile) {
-      this.logger.logger(`User ${authId} not found.`, { module: 'AuthService', method: 'deleteByAuthId' });
-      throw new NotFoundException('User not found');
+    if (!profile) {
+      this.logger.logger(`Profile for auth ${authId} not found.`, { module: 'AuthService', method: 'deleteByAuthId' });
+      throw new NotFoundException('Profile not found');
     }
 
     await this.commandBus.execute(

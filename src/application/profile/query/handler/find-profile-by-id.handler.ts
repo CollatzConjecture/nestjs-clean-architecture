@@ -1,14 +1,15 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { ProfileRepository } from '@infrastructure/repository/profile.repository';
+import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
 import { Profile } from '@domain/entities/Profile';
 import { FindProfileByIdQuery } from '@application/profile/query/find-profile-by-id.query';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, Inject } from '@nestjs/common';
 import { LoggerService } from '@domain/services/logger.service';
 
 @QueryHandler(FindProfileByIdQuery)
 export class FindProfileByIdHandler implements IQueryHandler<FindProfileByIdQuery> {
   constructor(
-    private readonly profileRepository: ProfileRepository,
+    @Inject('IProfileRepository')
+    private readonly profileRepository: IProfileRepository,
     private readonly logger: LoggerService,
   ) {}
 

@@ -1,17 +1,19 @@
-import { UserAggregate } from '@domain/aggregates/user.aggregate';
-import { AuthRepository } from '@infrastructure/repository/auth.repository';
-import { ConflictException } from '@nestjs/common';
-import { CommandHandler, EventPublisher, ICommandHandler } from '@nestjs/cqrs';
-import { AuthUserCreatedEvent } from '../../events/auth-user-created.event';
-import { CreateAuthUserCommand } from '../create-auth-user.command';
+import { IAuthRepository } from '@domain/interfaces/repositories/auth-repository.interface';
+import { ConflictException, Inject } from '@nestjs/common';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import { AuthUserCreatedEvent } from '@application/auth/events/auth-user-created.event';
+import { CreateAuthUserCommand } from '@application/auth/command/create-auth-user.command';
 import { LoggerService } from '@domain/services/logger.service';
+import { AuthDomainService } from '@domain/services/auth-domain.service';
 
 @CommandHandler(CreateAuthUserCommand)
 export class CreateAuthUserHandler implements ICommandHandler<CreateAuthUserCommand> {
   constructor(
-    private readonly authRepository: AuthRepository,
-    private readonly publisher: EventPublisher,
+    @Inject('IAuthRepository')
+    private readonly authRepository: IAuthRepository,
+    private readonly eventBus: EventBus,
     private readonly logger: LoggerService,
+    private readonly authDomainService: AuthDomainService,
   ) {}
 
   async execute(command: CreateAuthUserCommand): Promise<void> {
@@ -21,15 +23,13 @@ export class CreateAuthUserHandler implements ICommandHandler<CreateAuthUserComm
 
     this.logger.logger(`Starting user registration for email: ${email}`, context);
 
-    const existingAuth = await this.authRepository.findByEmail(email);
-    if (existingAuth) {
+    this.authDomainService.validateUserCreation(registerAuthDto);
+    
+    const canCreate = await this.authDomainService.canCreateUser(email);
+    if (!canCreate) {
       this.logger.warning(`Registration failed - email already exists: ${email}`, context);
       throw new ConflictException('An account with this email already exists.');
     }
-
-    const user = this.publisher.mergeObjectContext(
-      new UserAggregate()
-    );
 
     await this.authRepository.create({
       id: authId,
@@ -37,8 +37,8 @@ export class CreateAuthUserHandler implements ICommandHandler<CreateAuthUserComm
       password,
     });
     
-    this.logger.logger(`Auth user created successfully with ID: ${authId}. Dispatching AuthUserCreatedEvent.`, context);
-    user.apply(new AuthUserCreatedEvent(authId, profileId, name, lastname, age));
-    user.commit();
+    this.logger.logger(`Auth user created successfully with ID: ${authId}. Dispatching event.`, context);
+    
+    await this.eventBus.publish(new AuthUserCreatedEvent(authId, profileId, name, lastname, age));
   }
 } 

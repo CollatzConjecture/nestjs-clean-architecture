@@ -1,16 +1,19 @@
 import { DeleteAuthUserCommand } from "@application/auth/command/delete-auth-user.command";
 import { AuthUserDeletedEvent } from "@application/auth/events/auth-user-deleted.event";
-import { UserAggregate } from "@domain/aggregates/user.aggregate";
-import { AuthRepository } from "@infrastructure/repository/auth.repository";
-import { CommandHandler, EventPublisher, ICommandHandler } from "@nestjs/cqrs";
+import { IAuthRepository } from "@domain/interfaces/repositories/auth-repository.interface";
 import { LoggerService } from "@domain/services/logger.service";
+import { AuthDomainService } from "@domain/services/auth-domain.service";
+import { Inject } from "@nestjs/common";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 
 @CommandHandler(DeleteAuthUserCommand)
 export class DeleteAuthUserHandler implements ICommandHandler<DeleteAuthUserCommand> {
     constructor(
-        private readonly authRepository: AuthRepository,
-        private readonly publisher: EventPublisher,
+        @Inject('IAuthRepository')
+        private readonly authRepository: IAuthRepository,
+        private readonly eventBus: EventBus,
         private readonly logger: LoggerService,
+        private readonly authDomainService: AuthDomainService,
     ) {}
 
     async execute(command: DeleteAuthUserCommand): Promise<void> {
@@ -19,14 +22,16 @@ export class DeleteAuthUserHandler implements ICommandHandler<DeleteAuthUserComm
         
         this.logger.warning(`COMPENSATING ACTION: Deleting auth user ${authId} due to profile creation failure`, context);
         
-        await this.authRepository.deleteById(authId);
+        const userExists = await this.authDomainService.userExistsForDeletion(authId);
+        if (!userExists) {
+            this.logger.warning(`Auth user ${authId} not found for deletion`, context);
+            return;
+        }
 
-        const user = this.publisher.mergeObjectContext(
-            new UserAggregate()
-        );
+        await this.authRepository.delete(authId);
 
-        this.logger.logger(`Auth user ${authId} deleted successfully. Dispatching AuthUserDeletedEvent.`, context);
-        user.apply(new AuthUserDeletedEvent(authId, profileId));
-        user.commit();
+        this.logger.logger(`Auth user ${authId} deleted successfully. Dispatching event.`, context);
+        
+        await this.eventBus.publish(new AuthUserDeletedEvent(authId, profileId));
     }
 } 

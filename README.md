@@ -1,6 +1,6 @@
 # NestJS Clean Architecture with DDD, CQRS & Event Sourcing
 
-This is an advanced boilerplate project implementing **Domain-Driven Design (DDD)**, **Clean Architecture**, **CQRS (Command Query Responsibility Segregation)**, and **Event Sourcing** with NestJS. It provides a robust foundation for building scalable and maintainable enterprise-level applications.
+This is an advanced boilerplate project implementing **Domain-Driven Design (DDD)**, **Clean Architecture**, **CQRS (Command Query Responsibility Segregation)**, and **Event Sourcing** with NestJS. It provides a robust foundation for building scalable and maintainable enterprise-level applications with **proper separation of concerns** and **clean dependency direction**.
 
 If you want more documentation about NestJS, click here [Nest](https://github.com/nestjs/nest) 
 
@@ -11,11 +11,18 @@ If you want more documentation about NestJS, click here [Nest](https://github.co
 ## 🚀 Features
 
 ### Core Architecture
-- **Clean Architecture**: Enforces separation of concerns with Domain, Application, and Infrastructure layers.
-- **Domain-Driven Design (DDD)**: Encapsulates complex business logic using Aggregates and Domain Events.
+- **Clean Architecture**: Enforces strict separation of concerns with proper dependency direction (Infrastructure → Application → Domain).
+- **Domain-Driven Design (DDD)**: Pure business logic encapsulated in Domain Services, accessed through Repository Interfaces.
 - **CQRS**: Segregates read (Queries) and write (Commands) operations for optimized performance and scalability.
 - **Event Sourcing**: Uses an event-driven approach with sagas for orchestrating complex business processes.
-- **Aggregate Pattern**: Ensures data consistency and enforces business rules within domain aggregates.
+- **Repository Pattern**: Clean interfaces defined in Domain layer, implemented in Infrastructure layer.
+- **Dependency Inversion**: Domain layer depends only on abstractions, never on concrete implementations.
+
+### Proper Layer Separation
+- **Domain Layer**: Pure business logic, domain entities without framework dependencies, repository interfaces
+- **Application Layer**: Technical orchestration, HTTP concerns, CQRS coordination, framework dependencies
+- **Infrastructure Layer**: Database implementations, external API calls, concrete repository classes
+- **Controllers**: HTTP layer handling requests/responses, delegating to application services
 
 ### Security & Authentication
 - **JWT Authentication**: Implements secure, token-based authentication with refresh token rotation.
@@ -78,6 +85,9 @@ cd nestjs-clean-architecture
 │   │   │   └── logging.interceptor.ts # Request logging
 │   │   ├── middlewere/
 │   │   │   └── logger.middleware.ts   # HTTP logging
+│   │   ├── services/
+│   │   │   ├── auth.service.ts       # Auth orchestration (HTTP, JWT, OAuth)
+│   │   │   └── profile.service.ts    # Profile orchestration (CQRS coordination)
 │   │   └── profile/
 │   │       ├── command/         # Profile commands & handlers
 │   │       ├── query/           # Profile queries & handlers
@@ -88,13 +98,17 @@ cd nestjs-clean-architecture
 │   │   ├── aggregates/
 │   │   │   └── user.aggregate.ts # User domain aggregate
 │   │   ├── entities/
-│   │   │   ├── Auth.ts          # Authentication entity
-│   │   │   ├── Profile.ts       # Profile entity
+│   │   │   ├── Auth.ts          # Pure domain entity (no framework deps)
+│   │   │   ├── Profile.ts       # Pure domain entity (no framework deps)
 │   │   │   └── enums/           # Domain enums (roles, etc.)
+│   │   ├── interfaces/
+│   │   │   └── repositories/    # Repository contracts defined by domain
+│   │   │       ├── auth-repository.interface.ts
+│   │   │       └── profile-repository.interface.ts
 │   │   └── services/
-│   │       ├── auth.service.ts  # Authentication business logic
-│   │       ├── logger.service.ts # Logging service
-│   │       └── profile.service.ts # Profile business logic
+│   │       ├── auth-domain.service.ts    # Pure business logic for auth
+│   │       ├── profile-domain.service.ts # Pure business logic for profiles
+│   │       └── logger.service.ts         # Logging abstraction
 │   ├── infrastructure/
 │   │   ├── database/
 │   │   │   ├── database.module.ts    # Database configuration
@@ -108,8 +122,8 @@ cd nestjs-clean-architecture
 │   │   │   ├── profile.model.ts # Profile MongoDB model
 │   │   │   └── index.ts         # Model exports
 │   │   └── repository/
-│   │       ├── auth.repository.ts    # Auth data access
-│   │       └── profile.repository.ts # Profile data access
+│   │       ├── auth.repository.ts    # Implements IAuthRepository
+│   │       └── profile.repository.ts # Implements IProfileRepository
 │   ├── main.ts                  # Application entry point
 │   ├── app.module.ts           # Root application module
 │   └── constants.ts            # Application constants
@@ -136,19 +150,21 @@ cd nestjs-clean-architecture
 ### Event-Driven Flow
 1. **User Registration**:
    ```
+   Application Service → Domain Service (validation) → 
    RegisterCommand → CreateAuthUser → AuthUserCreated Event → 
    RegistrationSaga → CreateProfile → ProfileCreated
    ```
 
 2. **Authentication**:
    ```
+   Application Service → Domain Service (email validation) →
    LoginCommand → ValidateUser → JWT Token Generation
    ```
 
 3. **Google OAuth Flow**:
    ```
    /auth/google → Google OAuth → /auth/google/redirect → 
-   FindOrCreateUser → JWT Token Generation
+   Domain Service (validation) → FindOrCreateUser → JWT Token Generation
    ```
 
 4. **Error Handling**:
@@ -477,3 +493,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Event Sourcing](https://martinfowler.com/eaaDev/EventSourcing.html)
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [OAuth 2.0 Security Best Practices](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics)
+- [Repository Pattern](https://martinfowler.com/eaaCatalog/repository.html)
+- [Dependency Inversion Principle](https://blog.cleancoder.com/uncle-bob/2016/01/04/ALittleArchitecture.html)

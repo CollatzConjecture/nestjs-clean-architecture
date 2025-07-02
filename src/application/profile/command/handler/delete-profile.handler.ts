@@ -1,12 +1,14 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { DeleteProfileCommand } from "../delete-profile.command";
-import { ProfileRepository } from "@infrastructure/repository/profile.repository";
+import { Inject } from "@nestjs/common";
+import { DeleteProfileCommand } from "@application/profile/command/delete-profile.command";
+import { IProfileRepository } from "@domain/interfaces/repositories/profile-repository.interface";
 import { LoggerService } from "@domain/services/logger.service";
 
 @CommandHandler(DeleteProfileCommand)
 export class DeleteProfileHandler implements ICommandHandler<DeleteProfileCommand> {
     constructor(
-        private readonly profileRepository: ProfileRepository,
+        @Inject('IProfileRepository')
+        private readonly profileRepository: IProfileRepository,
         private readonly logger: LoggerService,
     ) {}
 
@@ -14,7 +16,7 @@ export class DeleteProfileHandler implements ICommandHandler<DeleteProfileComman
         const context = { module: 'DeleteProfileHandler', method: 'execute' };
         
         this.logger.warning(`Deleting profile ${command.profileId}`, context);
-        await this.profileRepository.deleteById(command.profileId);
+        await this.profileRepository.delete(command.profileId);
         this.logger.logger(`Profile ${command.profileId} deleted successfully`, context);
     }
 } 

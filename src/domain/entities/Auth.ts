@@ -1,5 +1,6 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '@domain/entities/enums/role.enum';
 
 export class AuthUser {
     @ApiProperty({
@@ -18,4 +19,9 @@ export class AuthUser {
     @IsNotEmpty()
     password: string;
 
+    @ApiProperty({ description: 'Google ID for OAuth users', required: false })
+    googleId?: string;
+
+    @ApiProperty({ description: 'User roles', example: ['USER'] })
+    role: Role[];
 }

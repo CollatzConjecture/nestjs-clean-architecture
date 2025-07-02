@@ -1,7 +1,7 @@
 import { LoginAuthDto } from '@application/dto/auth/login-auth.dto';
 import { RegisterAuthDto } from '@application/dto/auth/register-auth.dto';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
-import { AuthService } from '@domain/services/auth.service';
+import { AuthService } from '@application/services/auth.service';
 import { Body, Controller, Delete, Get, Param, Post, Query, Req, Request, Res, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
