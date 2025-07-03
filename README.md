@@ -20,9 +20,9 @@ If you want more documentation about NestJS, click here [Nest](https://github.co
 
 ### Proper Layer Separation
 - **Domain Layer**: Pure business logic, domain entities without framework dependencies, repository interfaces
-- **Application Layer**: Technical orchestration, HTTP concerns, CQRS coordination, framework dependencies
-- **Infrastructure Layer**: Database implementations, external API calls, concrete repository classes
-- **Controllers**: HTTP layer handling requests/responses, delegating to application services
+- **Application Layer**: Business orchestration, application services, CQRS coordination, framework-agnostic services
+- **API Layer**: HTTP controllers, DTOs, request/response handling, framework-specific HTTP concerns
+- **Infrastructure Layer**: Database implementations, external API calls, concrete repository classes, global services
 
 ### Security & Authentication
 - **JWT Authentication**: Implements secure, token-based authentication with refresh token rotation.
@@ -62,54 +62,82 @@ cd nestjs-clean-architecture
 │   ├── common.http              # Common API requests
 │   └── users.http               # User-specific API requests
 ├── src/
-│   ├── application/
-│   │   ├── __test__/
-│   │   │   └── *.spec.ts        # Application layer tests
-│   │   ├── auth/
-│   │   │   ├── command/         # Auth commands & handlers
-│   │   │   ├── events/          # Auth domain events
-│   │   │   ├── sagas/           # Registration saga
-│   │   │   ├── decorators/      # Custom decorators (roles)
-│   │   │   ├── guards/          # Authentication & authorization guards
-│   │   │   ├── jwt.strategy.ts  # JWT authentication strategy
-│   │   │   ├── local.strategy.ts # Local authentication strategy
-│   │   │   └── google.strategy.ts # Google OAuth2 strategy
+│   ├── api/                     # API Layer (HTTP Controllers & DTOs)
 │   │   ├── controllers/
 │   │   │   ├── auth.controller.ts    # Authentication endpoints
 │   │   │   ├── profile.controller.ts # Profile management
 │   │   │   └── hello.controller.ts   # Health check endpoint
 │   │   ├── dto/
 │   │   │   ├── auth/            # Authentication DTOs
-│   │   │   └── *.dto.ts         # Data transfer objects
+│   │   │   │   ├── login-auth.dto.ts
+│   │   │   │   └── register-auth.dto.ts
+│   │   │   ├── create-profile.dto.ts
+│   │   │   └── update-profile.dto.ts
+│   │   └── api.module.ts        # API module configuration
+│   ├── application/             # Application Layer (Business Orchestration)
+│   │   ├── __test__/
+│   │   │   └── *.spec.ts        # Application layer tests
+│   │   ├── auth/
+│   │   │   ├── command/         # Auth commands & handlers
+│   │   │   │   ├── create-auth-user.command.ts
+│   │   │   │   ├── delete-auth-user.command.ts
+│   │   │   │   └── handler/
+│   │   │   │       ├── create-auth-user.handler.ts
+│   │   │   │       └── delete-auth-user.handler.ts
+│   │   │   ├── events/          # Auth domain events
+│   │   │   │   ├── auth-user-created.event.ts
+│   │   │   │   └── auth-user-deleted.event.ts
+│   │   │   ├── sagas/           # Registration saga
+│   │   │   │   └── registration.saga.ts
+│   │   │   ├── decorators/      # Custom decorators (roles)
+│   │   │   │   └── roles.decorator.ts
+│   │   │   ├── guards/          # Authentication & authorization guards
+│   │   │   │   └── roles.guard.ts
+│   │   │   ├── jwt.strategy.ts  # JWT authentication strategy
+│   │   │   ├── local.strategy.ts # Local authentication strategy
+│   │   │   ├── google.strategy.ts # Google OAuth2 strategy
+│   │   │   └── auth.module.ts   # Auth module configuration
+│   │   ├── decorators/
+│   │   │   └── current-user.decorator.ts # Current user decorator
+│   │   ├── dto/                 # Application DTOs (mirrored from API)
+│   │   │   ├── auth/
+│   │   │   └── *.dto.ts
+│   │   ├── interfaces/
+│   │   │   └── authenticated-request.interface.ts
 │   │   ├── interceptors/
 │   │   │   └── logging.interceptor.ts # Request logging
 │   │   ├── middlewere/
 │   │   │   └── logger.middleware.ts   # HTTP logging
 │   │   ├── services/
 │   │   │   ├── auth.service.ts       # Auth orchestration (HTTP, JWT, OAuth)
-│   │   │   └── profile.service.ts    # Profile orchestration (CQRS coordination)
-│   │   └── profile/
-│   │       ├── command/         # Profile commands & handlers
-│   │       ├── query/           # Profile queries & handlers
-│   │       └── events/          # Profile domain events
-│   ├── domain/
+│   │   │   ├── profile.service.ts    # Profile orchestration (CQRS coordination)
+│   │   │   └── logger.service.ts     # Application logging service
+│   │   ├── profile/
+│   │   │   ├── command/         # Profile commands & handlers
+│   │   │   │   ├── create-profile.command.ts
+│   │   │   │   └── handler/
+│   │   │   │       └── create-profile.handler.ts
+│   │   │   ├── events/          # Profile domain events
+│   │   │   │   └── profile-creation-failed.event.ts
+│   │   │   └── profile.module.ts # Profile module configuration
+│   │   └── application.module.ts # Application module aggregator
+│   ├── domain/                  # Domain Layer (Pure Business Logic)
 │   │   ├── __test__/
 │   │   │   └── *.spec.ts        # Domain layer tests
-│   │   ├── aggregates/
-│   │   │   └── user.aggregate.ts # User domain aggregate
+│   │   ├── aggregates/          # Domain aggregates
 │   │   ├── entities/
 │   │   │   ├── Auth.ts          # Pure domain entity (no framework deps)
 │   │   │   ├── Profile.ts       # Pure domain entity (no framework deps)
 │   │   │   └── enums/           # Domain enums (roles, etc.)
+│   │   │       └── role.enum.ts
 │   │   ├── interfaces/
 │   │   │   └── repositories/    # Repository contracts defined by domain
 │   │   │       ├── auth-repository.interface.ts
 │   │   │       └── profile-repository.interface.ts
 │   │   └── services/
 │   │       ├── auth-domain.service.ts    # Pure business logic for auth
-│   │       ├── profile-domain.service.ts # Pure business logic for profiles
-│   │       └── logger.service.ts         # Logging abstraction
-│   ├── infrastructure/
+│   │       └── profile-domain.service.ts # Pure business logic for profiles
+│   ├── infrastructure/          # Infrastructure Layer (External Concerns)
 │   │   ├── database/
 │   │   │   ├── database.module.ts    # Database configuration
 │   │   │   └── database.providers.ts # Database providers
@@ -118,8 +146,8 @@ cd nestjs-clean-architecture
 │   │   ├── logger/
 │   │   │   └── logger.module.ts # Global logger module
 │   │   ├── models/
-│   │   │   ├── auth.model.ts    # Auth MongoDB model
-│   │   │   ├── profile.model.ts # Profile MongoDB model
+│   │   │   ├── auth.model.ts    # Auth MongoDB model (with timestamps)
+│   │   │   ├── profile.model.ts # Profile MongoDB model (with timestamps)
 │   │   │   └── index.ts         # Model exports
 │   │   └── repository/
 │   │       ├── auth.repository.ts    # Implements IAuthRepository
@@ -141,6 +169,21 @@ cd nestjs-clean-architecture
 
 ## 🏗️ Architecture Overview
 
+### Layer Architecture
+This project follows a strict 4-layer architecture:
+
+1. **API Layer** (`src/api/`): HTTP controllers, DTOs, and request/response handling
+2. **Application Layer** (`src/application/`): Business orchestration, CQRS coordination, and application services
+3. **Domain Layer** (`src/domain/`): Pure business logic, entities, and domain services
+4. **Infrastructure Layer** (`src/infrastructure/`): Database, external services, and technical implementations
+
+### Module Structure
+- **ApiModule**: Aggregates all HTTP controllers and imports ApplicationModule
+- **ApplicationModule**: Central orchestrator that imports and exports feature modules
+- **AuthModule**: Self-contained authentication feature with all its dependencies
+- **ProfileModule**: Self-contained profile management feature with all its dependencies
+- **LoggerModule**: Global infrastructure service for application-wide logging
+
 ### CQRS Implementation
 - **Commands**: Handle write operations (Create, Update, Delete). Located in `src/application/*/command`.
 - **Queries**: Handle read operations (Find, Get). Located in `src/application/*/query`.
@@ -150,14 +193,14 @@ cd nestjs-clean-architecture
 ### Event-Driven Flow
 1. **User Registration**:
    ```
-   Application Service → Domain Service (validation) → 
+   API Controller → Application Service → Domain Service (validation) → 
    RegisterCommand → CreateAuthUser → AuthUserCreated Event → 
    RegistrationSaga → CreateProfile → ProfileCreated
    ```
 
 2. **Authentication**:
    ```
-   Application Service → Domain Service (email validation) →
+   API Controller → Application Service → Domain Service (email validation) →
    LoginCommand → ValidateUser → JWT Token Generation
    ```
 
@@ -172,6 +215,12 @@ cd nestjs-clean-architecture
    ProfileCreationFailed Event → RegistrationSaga → 
    DeleteAuthUser (Compensating Transaction)
    ```
+
+### Dependency Injection & Module Boundaries
+- **Feature Modules**: Each feature (Auth, Profile) manages its own dependencies
+- **Domain Services**: Injected via factories to maintain Clean Architecture principles
+- **Repository Pattern**: Interfaces defined in domain, implementations in infrastructure
+- **Global Services**: Logger provided globally via `@Global()` decorator
 
 ## 📋 Prerequisites
 
@@ -463,6 +512,7 @@ curl -X GET http://localhost:4000/profile/all \
 - **Blind Indexing**: Secure querying of encrypted data
 - **Input Validation**: Comprehensive DTO validation using class-validator
 - **SQL Injection Prevention**: MongoDB with Mongoose provides built-in protection
+- **Automatic Timestamps**: All models include `createdAt` and `updatedAt` for audit trails
 
 ### Access Control
 - **Role-Based Authorization**: Complete RBAC implementation with guards
