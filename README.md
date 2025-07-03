@@ -99,9 +99,6 @@ cd nestjs-clean-architecture
 │   │   │   └── auth.module.ts   # Auth module configuration
 │   │   ├── decorators/
 │   │   │   └── current-user.decorator.ts # Current user decorator
-│   │   ├── dto/                 # Application DTOs (mirrored from API)
-│   │   │   ├── auth/
-│   │   │   └── *.dto.ts
 │   │   ├── interfaces/
 │   │   │   └── authenticated-request.interface.ts
 │   │   ├── interceptors/

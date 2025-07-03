@@ -7,8 +7,8 @@ import * as crypto from 'crypto';
 
 import { CreateAuthUserCommand } from '@application/auth/command/create-auth-user.command';
 import { DeleteAuthUserCommand } from '@application/auth/command/delete-auth-user.command';
-import { LoginAuthDto } from '@application/dto/auth/login-auth.dto';
-import { RegisterAuthDto } from '@application/dto/auth/register-auth.dto';
+import { LoginAuthDto } from '@api/dto/auth/login-auth.dto';
+import { RegisterAuthDto } from '@api/dto/auth/register-auth.dto';
 import { GOOGLE_CALLBACK_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from '@constants';
 import { AuthUser } from '@domain/entities/Auth';
 import { Role } from '@domain/entities/enums/role.enum';
