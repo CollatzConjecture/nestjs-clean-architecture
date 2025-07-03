@@ -53,6 +53,7 @@ export const AuthSchema = new mongoose.Schema({
 }, {
     toJSON: { getters: true },
     toObject: { getters: true },
+    timestamps: true,
 });
 
 AuthSchema.pre('save', async function (next) {
@@ -79,4 +80,6 @@ export interface Auth extends mongoose.Document {
     readonly emailHash?: string;
     readonly password?: string;
     readonly currentHashedRefreshToken?: string;
+    readonly createdAt: Date;
+    readonly updatedAt: Date;
 } 

@@ -7,6 +7,8 @@ export const ProfileSchema = new mongoose.Schema({
   name: String,
   lastname: String,
   age: Number,
+}, {
+  timestamps: true,
 });
 
 export interface Profile extends mongoose.Document {
@@ -15,6 +17,8 @@ export interface Profile extends mongoose.Document {
     readonly name: string;
     readonly lastname: string;
     readonly age: number;
+    readonly createdAt: Date;
+    readonly updatedAt: Date;
 }
 
 export class ProfileModel {
