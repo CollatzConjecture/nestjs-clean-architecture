@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { QueryBus } from '@nestjs/cqrs';
 
 import { CreateProfileDto } from '@application/dto/create-profile.dto';
-import { FindProfileByIdQuery } from '@application/profile/query/find-profile-by-id.query';
-import { FindProfilesQuery } from '@application/profile/query/find-profiles.query';
 import { Profile } from '@domain/entities/Profile';
 import { Role } from '@domain/entities/enums/role.enum';
 import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
@@ -15,7 +12,6 @@ export class ProfileService {
   constructor(
     @Inject('IProfileRepository')
     private readonly repository: IProfileRepository,
-    private readonly queryBus: QueryBus,
     private readonly logger: LoggerService,
     private readonly profileDomainService: ProfileDomainService,
   ) {}
@@ -34,13 +30,13 @@ export class ProfileService {
   async find(): Promise<Profile[]> {
     const context = { module: 'ProfileService', method: 'find' };
     this.logger.logger('Fetching all profiles', context);
-    return this.queryBus.execute(new FindProfilesQuery());
+    return this.repository.findAll();
   }
 
   async findById(id: string): Promise<Profile | null> {
     const context = { module: 'ProfileService', method: 'findById' };
     this.logger.logger(`Fetching profile for id: ${id}`, context);
-    return this.queryBus.execute(new FindProfileByIdQuery(id));
+    return this.repository.findById(id);
   }
 
   async findByRole(role: Role): Promise<Profile[]> {

@@ -167,7 +167,6 @@ export class AuthService {
           throw new Error('User already exists with this email');
         }
 
-        // Domain services generate IDs - proper DDD
         const authId = this.authDomainService.generateUserId();
         const profileId = this.profileDomainService.generateProfileId();
 
