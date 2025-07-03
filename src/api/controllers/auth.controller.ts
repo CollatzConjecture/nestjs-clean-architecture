@@ -2,14 +2,17 @@ import { LoginAuthDto } from '@api/dto/auth/login-auth.dto';
 import { RegisterAuthDto } from '@api/dto/auth/register-auth.dto';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
 import { AuthService } from '@application/services/auth.service';
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Query, Req, Request, Res, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Query, Req, Request, Res, UseGuards, UseInterceptors, Version } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Request as ExpressRequest, Response } from 'express';
 
 @ApiTags('auth')
-@Controller('auth')
+@Controller({
+  path: 'auth',
+  version: '1'
+})
 @UseGuards(ThrottlerGuard)
 @UseInterceptors(LoggingInterceptor)
 export class AuthController {

@@ -3,8 +3,8 @@
 @host = {{hostname}}:{{port}}
 @contentType = application/json
 
-### Create Uuser
-POST http://{{host}} HTTP/1.1
+### Update User Profile
+POST http://{{host}}/api/v1/profile/me HTTP/1.1
 Content-Type: {{contentType}}
 
 {
@@ -14,5 +14,5 @@ Content-Type: {{contentType}}
 }
 
 
-### Create Uuser
-GET http://{{host}}/all HTTP/1.1
+### Get All Users (Admin only)
+GET http://{{host}}/api/v1/profile/all HTTP/1.1

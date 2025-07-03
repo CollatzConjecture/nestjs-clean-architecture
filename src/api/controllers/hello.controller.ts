@@ -3,7 +3,10 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
 import { LoggerService } from '@application/services/logger.service';
 
-@Controller('hello')
+@Controller({
+  path: 'hello',
+  version: '1'
+})
 @ApiTags('hello')
 @UseInterceptors(LoggingInterceptor)
 export class HelloController {

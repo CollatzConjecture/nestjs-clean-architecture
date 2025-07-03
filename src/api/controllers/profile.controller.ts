@@ -14,7 +14,10 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 @ApiTags('profile')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
-@Controller('profile')
+@Controller({
+  path: 'profile',
+  version: '1'
+})
 @UseInterceptors(LoggingInterceptor)
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
