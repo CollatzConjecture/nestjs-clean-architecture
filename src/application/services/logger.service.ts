@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { APP_HOST } from '@constants';
+import { Injectable, Logger } from '@nestjs/common';
 
 export class Context {
   module: string;
@@ -25,4 +25,4 @@ export class LoggerService extends Logger {
     const data = {...standard, ...context, message};
     super.warn(data);
   }
-}
+} 

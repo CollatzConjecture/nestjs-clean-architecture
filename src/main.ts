@@ -6,6 +6,7 @@ moduleAlias.addAliases({
   '@domain': path.resolve(__dirname, 'domain'),
   '@application': path.resolve(__dirname, 'application'),
   '@infrastructure': path.resolve(__dirname, 'infrastructure'),
+  '@api': path.resolve(__dirname, 'api'),
   '@constants': path.format({ dir: __dirname, name: 'constants' }),
 });
 

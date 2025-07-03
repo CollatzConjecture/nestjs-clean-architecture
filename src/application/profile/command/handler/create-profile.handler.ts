@@ -3,7 +3,7 @@ import { Inject } from '@nestjs/common';
 import { CreateProfileCommand } from '@application/profile/command/create-profile.command';
 import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
 import { ProfileCreationFailedEvent } from '@application/profile/events/profile-creation-failed.event';
-import { LoggerService } from '@domain/services/logger.service';
+import { LoggerService } from '@application/services/logger.service';
 
 @CommandHandler(CreateProfileCommand)
 export class CreateProfileHandler implements ICommandHandler<CreateProfileCommand> {

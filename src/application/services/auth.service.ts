@@ -15,7 +15,7 @@ import { Role } from '@domain/entities/enums/role.enum';
 import { IAuthRepository } from '@domain/interfaces/repositories/auth-repository.interface';
 import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
 import { AuthDomainService } from '@domain/services/auth-domain.service';
-import { LoggerService } from '@domain/services/logger.service';
+import { LoggerService } from '@application/services/logger.service';
 import { ProfileDomainService } from '@domain/services/profile-domain.service';
 
 @Injectable()

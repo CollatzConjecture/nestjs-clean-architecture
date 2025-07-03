@@ -1,8 +1,8 @@
 import { Roles } from '@application/auth/decorators/roles.decorator';
 import { RolesGuard } from '@application/auth/guards/roles.guard';
 import { CurrentUserId } from '@application/decorators/current-user.decorator';
-import { CreateProfileDto } from '@application/dto/create-profile.dto';
-import { UpdateProfileDto } from '@application/dto/update-profile.dto';
+import { CreateProfileDto } from '@api/dto/create-profile.dto';
+import { UpdateProfileDto } from '@api/dto/update-profile.dto';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
 import { ProfileService } from '@application/services/profile.service';
 import { Role } from '@domain/entities/enums/role.enum';

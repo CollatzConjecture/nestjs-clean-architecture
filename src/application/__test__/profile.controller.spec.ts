@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { Test } from '@nestjs/testing';
 import { has, cloneDeep } from 'lodash';
 import { TestingModule } from '@nestjs/testing/testing-module';
-import { ProfileController } from '@application/controllers/profile.controller';
+import { ProfileController } from '@api/controllers/profile.controller';
 import { ProfileService } from '@application/services/profile.service';
 import { ProfileModel } from '@infrastructure/models/profile.model';
 import { Profile } from '@domain/entities/Profile';

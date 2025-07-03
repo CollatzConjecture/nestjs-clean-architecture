@@ -1,20 +1,19 @@
 import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Context, LoggerService } from '@domain/services/logger.service';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
+import { LoggerService } from '@application/services/logger.service';
 
 @Controller('hello')
 @ApiTags('hello')
 @UseInterceptors(LoggingInterceptor)
 export class HelloController {
-    private Log: LoggerService = new LoggerService('HelloController');
+    constructor(private readonly logger: LoggerService) {}
     
     @Get('')
     @ApiOperation({ summary: 'Get hello message' })
     @ApiResponse({ status: 200, description: 'Returns hello world message' })
     get(): string {
-        const context: Context = { module: 'HelloController', method: 'get' };
-        this.Log.logger('Hello World!', context);
+        this.logger.logger('Hello World!', { module: 'HelloController', method: 'get' });
         return 'Hello World!';
     }
 }

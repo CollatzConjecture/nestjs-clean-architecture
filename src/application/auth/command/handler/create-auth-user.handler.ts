@@ -3,7 +3,7 @@ import { ConflictException, Inject } from '@nestjs/common';
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { AuthUserCreatedEvent } from '@application/auth/events/auth-user-created.event';
 import { CreateAuthUserCommand } from '@application/auth/command/create-auth-user.command';
-import { LoggerService } from '@domain/services/logger.service';
+import { LoggerService } from '@application/services/logger.service';
 import { AuthDomainService } from '@domain/services/auth-domain.service';
 
 @CommandHandler(CreateAuthUserCommand)

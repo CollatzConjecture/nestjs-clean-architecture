@@ -1,4 +1,4 @@
-import { LoggerService } from '@domain/services/logger.service';
+import { LoggerService } from '@application/services/logger.service';
 import { Global, Module } from '@nestjs/common';
 
 @Global()

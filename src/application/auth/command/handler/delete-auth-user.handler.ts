@@ -2,7 +2,7 @@ import { DeleteAuthUserCommand } from "@application/auth/command/delete-auth-use
 import { AuthUserDeletedEvent } from "@application/auth/events/auth-user-deleted.event";
 import { IAuthRepository } from "@domain/interfaces/repositories/auth-repository.interface";
 import { IProfileRepository } from "@domain/interfaces/repositories/profile-repository.interface";
-import { LoggerService } from "@domain/services/logger.service";
+import { LoggerService } from "@application/services/logger.service";
 import { AuthDomainService } from "@domain/services/auth-domain.service";
 import { Inject } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";

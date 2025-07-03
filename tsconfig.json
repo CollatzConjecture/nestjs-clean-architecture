@@ -14,7 +14,8 @@
       "@constants": ["src/constants"],
       "@domain/*": ["src/domain/*"],
       "@application/*": ["src/application/*"],
-      "@infrastructure/*": ["src/infrastructure/*"]
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@api/*": ["src/api/*"]
     }
   },
   "exclude": ["node_modules"]

@@ -4,7 +4,6 @@ import { modelProviders } from '@infrastructure/models';
 import { ProfileRepository } from '@infrastructure/repository/profile.repository';
 import { CreateProfileHandler } from '@application/profile/command/handler/create-profile.handler';
 import { ProfileService } from '@application/services/profile.service';
-import { ProfileController } from '@application/controllers/profile.controller';
 import { DatabaseModule } from '@infrastructure/database/database.module';
 import { RegistrationSaga } from '@application/auth/sagas/registration.saga';
 import { ProfileDomainService } from '@domain/services/profile-domain.service';
@@ -14,10 +13,13 @@ export const Sagas = [RegistrationSaga];
 
 @Module({
   imports: [CqrsModule, DatabaseModule],
-  controllers: [ProfileController],
   providers: [
     ProfileService,
-    ProfileDomainService,
+    {
+      provide: ProfileDomainService,
+      useFactory: (profileRepo) => new ProfileDomainService(profileRepo),
+      inject: ['IProfileRepository'],
+    },
     {
       provide: 'IProfileRepository',
       useClass: ProfileRepository,
@@ -26,6 +28,7 @@ export const Sagas = [RegistrationSaga];
     ...CommandHandlers,
     ...Sagas,
   ],
+  exports: [ProfileService, ProfileDomainService, 'IProfileRepository'],
 })
 
-export class ProfileModule {} 
+export class ProfileModule { } 

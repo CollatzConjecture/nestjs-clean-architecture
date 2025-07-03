@@ -1,4 +1,3 @@
-import { Injectable, Inject } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthUser } from '@domain/entities/Auth';
 import { Role } from '@domain/entities/enums/role.enum';
@@ -8,10 +7,8 @@ import { IAuthRepository } from '@domain/interfaces/repositories/auth-repository
  * Domain Service for Auth Business Logic
  * Contains pure business rules and logic
  */
-@Injectable()
 export class AuthDomainService {
   constructor(
-    @Inject('IAuthRepository')
     private readonly authRepo: IAuthRepository
   ) {}
 
@@ -115,8 +112,6 @@ export class AuthDomainService {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
-
-
 
   /**
    * Business Logic: Validate user creation data

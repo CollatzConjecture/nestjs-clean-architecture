@@ -1,4 +1,3 @@
-import { Injectable, Inject } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { Profile } from '@domain/entities/Profile';
 import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
@@ -7,10 +6,8 @@ import { IProfileRepository } from '@domain/interfaces/repositories/profile-repo
  * Domain Service for Profile Business Logic
  * Contains pure business rules and logic
  */
-@Injectable()
 export class ProfileDomainService {
   constructor(
-    @Inject('IProfileRepository')
     private readonly profileRepo: IProfileRepository
   ) { }
 

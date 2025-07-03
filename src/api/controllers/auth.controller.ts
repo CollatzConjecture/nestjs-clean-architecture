@@ -1,5 +1,5 @@
-import { LoginAuthDto } from '@application/dto/auth/login-auth.dto';
-import { RegisterAuthDto } from '@application/dto/auth/register-auth.dto';
+import { LoginAuthDto } from '@api/dto/auth/login-auth.dto';
+import { RegisterAuthDto } from '@api/dto/auth/register-auth.dto';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
 import { AuthService } from '@application/services/auth.service';
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Query, Req, Request, Res, UseGuards, UseInterceptors } from '@nestjs/common';
