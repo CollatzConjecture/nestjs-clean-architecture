@@ -75,13 +75,6 @@ export class ProfileDomainService {
   }
 
   /**
-   * Business Logic: Check if profile can be deleted
-   */
-  canDeleteProfile(profile: Profile, requestingUserId: string, isAdmin: boolean): boolean {
-    return profile.authId === requestingUserId || isAdmin;
-  }
-
-  /**
    * Business Logic: Check if profile can be updated
    */
   canUpdateProfile(profile: Profile, requestingUserId: string, isAdmin: boolean): boolean {

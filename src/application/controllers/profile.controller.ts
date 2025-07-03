@@ -7,7 +7,7 @@ import { LoggingInterceptor } from '@application/interceptors/logging.intercepto
 import { ProfileService } from '@application/services/profile.service';
 import { Role } from '@domain/entities/enums/role.enum';
 import { Profile } from '@domain/entities/Profile';
-import { BadRequestException, Body, Controller, Get, Param, Post, Put, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post, Put, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -47,12 +47,19 @@ export class ProfileController {
   @Get(':id')
   @ApiOperation({ summary: 'Get user profile' })
   @ApiResponse({ status: 200, description: 'Returns user profile.'})
+  @ApiResponse({ status: 404, description: 'Profile not found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  getProfile(@Param('id') id: string) {
+  async getProfile(@Param('id') id: string) {
     if (!id) {
       throw new BadRequestException('Profile id is required');
     }
-    return this.profileService.findById(id);
+    
+    const profile = await this.profileService.findById(id);
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+    
+    return profile;
   }
 
   @Put('me')

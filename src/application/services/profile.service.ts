@@ -58,21 +58,7 @@ export class ProfileService {
     return await this.repository.update(profile.id, updates);
   }
 
-  async delete(profileId: string, requestingUserId: string, isAdmin: boolean = false): Promise<void> {
-    this.logger.logger(`Deleting profile ${profileId}`, { module: 'ProfileService', method: 'delete' });
-    
-    const profile = await this.repository.findById(profileId);
-    if (!profile) {
-      throw new Error('Profile not found');
-    }
 
-    const canDelete = this.profileDomainService.canDeleteProfile(profile, requestingUserId, isAdmin);
-    if (!canDelete) {
-      throw new Error('Not authorized to delete this profile');
-    }
-
-    await this.repository.delete(profileId);
-  }
 
   async isProfileComplete(profileId: string): Promise<boolean> {
     const profile = await this.repository.findById(profileId);

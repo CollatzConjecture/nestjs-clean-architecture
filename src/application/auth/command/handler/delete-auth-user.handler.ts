@@ -1,6 +1,7 @@
 import { DeleteAuthUserCommand } from "@application/auth/command/delete-auth-user.command";
 import { AuthUserDeletedEvent } from "@application/auth/events/auth-user-deleted.event";
 import { IAuthRepository } from "@domain/interfaces/repositories/auth-repository.interface";
+import { IProfileRepository } from "@domain/interfaces/repositories/profile-repository.interface";
 import { LoggerService } from "@domain/services/logger.service";
 import { AuthDomainService } from "@domain/services/auth-domain.service";
 import { Inject } from "@nestjs/common";
@@ -11,6 +12,8 @@ export class DeleteAuthUserHandler implements ICommandHandler<DeleteAuthUserComm
     constructor(
         @Inject('IAuthRepository')
         private readonly authRepository: IAuthRepository,
+        @Inject('IProfileRepository')
+        private readonly profileRepository: IProfileRepository,
         private readonly eventBus: EventBus,
         private readonly logger: LoggerService,
         private readonly authDomainService: AuthDomainService,
@@ -20,7 +23,7 @@ export class DeleteAuthUserHandler implements ICommandHandler<DeleteAuthUserComm
         const { authId, profileId } = command;
         const context = { module: 'DeleteAuthUserHandler', method: 'execute' };
         
-        this.logger.warning(`COMPENSATING ACTION: Deleting auth user ${authId} due to profile creation failure`, context);
+        this.logger.warning(`COMPENSATING ACTION: Deleting auth user ${authId} and associated profile ${profileId}`, context);
         
         const userExists = await this.authDomainService.userExistsForDeletion(authId);
         if (!userExists) {
@@ -29,8 +32,9 @@ export class DeleteAuthUserHandler implements ICommandHandler<DeleteAuthUserComm
         }
 
         await this.authRepository.delete(authId);
+        await this.profileRepository.delete(profileId);
 
-        this.logger.logger(`Auth user ${authId} deleted successfully. Dispatching event.`, context);
+        this.logger.logger(`Auth user ${authId} and profile ${profileId} deleted successfully. Dispatching event.`, context);
         
         await this.eventBus.publish(new AuthUserDeletedEvent(authId, profileId));
     }

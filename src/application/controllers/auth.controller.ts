@@ -2,7 +2,7 @@ import { LoginAuthDto } from '@application/dto/auth/login-auth.dto';
 import { RegisterAuthDto } from '@application/dto/auth/register-auth.dto';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
 import { AuthService } from '@application/services/auth.service';
-import { Body, Controller, Delete, Get, Param, Post, Query, Req, Request, Res, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Query, Req, Request, Res, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
@@ -83,18 +83,23 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user profile by auth id' })
   @ApiResponse({ status: 200, description: 'Returns user profile.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async getProfile(@Param('id') id: string) {
-    return this.authService.findByAuthId(id);
+    const user = await this.authService.findByAuthId(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete user profile by auth id' })
-  @ApiResponse({ status: 200, description: 'User profile deleted.' })
+  @ApiOperation({ summary: 'Delete user (auth + profile) by auth id' })
+  @ApiResponse({ status: 200, description: 'User deleted successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async deleteProfile(@Param('id') id: string) {
+  async deleteUser(@Param('id') id: string) {
     return this.authService.deleteByAuthId(id);
   }
 } 
