@@ -64,58 +64,47 @@ cd nestjs-clean-architecture
 ├── src/
 │   ├── api/                     # API Layer (HTTP Controllers & DTOs)
 │   │   ├── controllers/
-│   │   │   ├── auth.controller.ts    # Authentication endpoints
-│   │   │   ├── profile.controller.ts # Profile management
-│   │   │   └── hello.controller.ts   # Health check endpoint
+│   │   │   └── *.controller.ts  # HTTP endpoints (auth, profile, hello)
 │   │   ├── dto/
 │   │   │   ├── auth/            # Authentication DTOs
-│   │   │   │   ├── login-auth.dto.ts
-│   │   │   │   └── register-auth.dto.ts
-│   │   │   ├── create-profile.dto.ts
-│   │   │   └── update-profile.dto.ts
+│   │   │   │   └── *.dto.ts     # Login & register DTOs
+│   │   │   └── *.dto.ts         # Profile management DTOs
 │   │   └── api.module.ts        # API module configuration
 │   ├── application/             # Application Layer (Business Orchestration)
 │   │   ├── __test__/
 │   │   │   └── *.spec.ts        # Application layer tests
 │   │   ├── auth/
 │   │   │   ├── command/         # Auth commands & handlers
-│   │   │   │   ├── create-auth-user.command.ts
-│   │   │   │   ├── delete-auth-user.command.ts
+│   │   │   │   ├── *.command.ts # Create/delete auth user commands
 │   │   │   │   └── handler/
-│   │   │   │       ├── create-auth-user.handler.ts
-│   │   │   │       └── delete-auth-user.handler.ts
+│   │   │   │       └── *.handler.ts # Command handlers
 │   │   │   ├── events/          # Auth domain events
-│   │   │   │   ├── auth-user-created.event.ts
-│   │   │   │   └── auth-user-deleted.event.ts
-│   │   │   ├── sagas/           # Registration saga
-│   │   │   │   └── registration.saga.ts
-│   │   │   ├── decorators/      # Custom decorators (roles)
-│   │   │   │   └── roles.decorator.ts
-│   │   │   ├── guards/          # Authentication & authorization guards
-│   │   │   │   └── roles.guard.ts
-│   │   │   ├── jwt.strategy.ts  # JWT authentication strategy
-│   │   │   ├── local.strategy.ts # Local authentication strategy
-│   │   │   ├── google.strategy.ts # Google OAuth2 strategy
+│   │   │   │   └── *.event.ts   # User created/deleted events
+│   │   │   ├── sagas/
+│   │   │   │   └── *.saga.ts    # Registration flow orchestration
+│   │   │   ├── decorators/
+│   │   │   │   └── *.decorator.ts # Custom decorators (roles)
+│   │   │   ├── guards/
+│   │   │   │   └── *.guard.ts   # Authentication & authorization guards
+│   │   │   ├── *.strategy.ts    # Auth strategies (JWT, local, Google OAuth)
 │   │   │   └── auth.module.ts   # Auth module configuration
 │   │   ├── decorators/
-│   │   │   └── current-user.decorator.ts # Current user decorator
+│   │   │   └── *.decorator.ts   # Global decorators (current user)
 │   │   ├── interfaces/
-│   │   │   └── authenticated-request.interface.ts
+│   │   │   └── *.interface.ts   # Application interfaces
 │   │   ├── interceptors/
-│   │   │   └── logging.interceptor.ts # Request logging
+│   │   │   └── *.interceptor.ts # Request logging interceptors
 │   │   ├── middlewere/
-│   │   │   └── logger.middleware.ts   # HTTP logging
+│   │   │   └── *.middleware.ts  # HTTP middleware (logging)
 │   │   ├── services/
-│   │   │   ├── auth.service.ts       # Auth orchestration (HTTP, JWT, OAuth)
-│   │   │   ├── profile.service.ts    # Profile orchestration (CQRS coordination)
-│   │   │   └── logger.service.ts     # Application logging service
+│   │   │   └── *.service.ts     # Application services (auth, profile, logger)
 │   │   ├── profile/
 │   │   │   ├── command/         # Profile commands & handlers
-│   │   │   │   ├── create-profile.command.ts
+│   │   │   │   ├── *.command.ts # Profile commands
 │   │   │   │   └── handler/
-│   │   │   │       └── create-profile.handler.ts
+│   │   │   │       └── *.handler.ts # Command handlers
 │   │   │   ├── events/          # Profile domain events
-│   │   │   │   └── profile-creation-failed.event.ts
+│   │   │   │   └── *.event.ts   # Profile events
 │   │   │   └── profile.module.ts # Profile module configuration
 │   │   └── application.module.ts # Application module aggregator
 │   ├── domain/                  # Domain Layer (Pure Business Logic)
@@ -123,44 +112,37 @@ cd nestjs-clean-architecture
 │   │   │   └── *.spec.ts        # Domain layer tests
 │   │   ├── aggregates/          # Domain aggregates
 │   │   ├── entities/
-│   │   │   ├── Auth.ts          # Pure domain entity (no framework deps)
-│   │   │   ├── Profile.ts       # Pure domain entity (no framework deps)
-│   │   │   └── enums/           # Domain enums (roles, etc.)
-│   │   │       └── role.enum.ts
+│   │   │   ├── *.ts             # Pure domain entities (Auth, Profile)
+│   │   │   └── enums/           # Domain enums
+│   │   │       └── *.enum.ts    # Role enums, etc.
 │   │   ├── interfaces/
 │   │   │   └── repositories/    # Repository contracts defined by domain
-│   │   │       ├── auth-repository.interface.ts
-│   │   │       └── profile-repository.interface.ts
+│   │   │       └── *.interface.ts # Repository interfaces
 │   │   └── services/
-│   │       ├── auth-domain.service.ts    # Pure business logic for auth
-│   │       └── profile-domain.service.ts # Pure business logic for profiles
+│   │       └── *.service.ts     # Pure business logic services
 │   ├── infrastructure/          # Infrastructure Layer (External Concerns)
 │   │   ├── database/
 │   │   │   ├── database.module.ts    # Database configuration
 │   │   │   └── database.providers.ts # Database providers
 │   │   ├── health/
-│   │   │   └── terminus-options.check.ts # Health check config
+│   │   │   └── *.check.ts       # Health check configurations
 │   │   ├── logger/
 │   │   │   └── logger.module.ts # Global logger module
 │   │   ├── models/
-│   │   │   ├── auth.model.ts    # Auth MongoDB model (with timestamps)
-│   │   │   ├── profile.model.ts # Profile MongoDB model (with timestamps)
+│   │   │   ├── *.model.ts       # MongoDB models (auth, profile)
 │   │   │   └── index.ts         # Model exports
 │   │   └── repository/
-│   │       ├── auth.repository.ts    # Implements IAuthRepository
-│   │       └── profile.repository.ts # Implements IProfileRepository
+│   │       └── *.repository.ts  # Repository implementations
 │   ├── main.ts                  # Application entry point
 │   ├── app.module.ts           # Root application module
 │   └── constants.ts            # Application constants
 ├── test/
-│   ├── app.e2e-spec.ts         # End-to-end tests
+│   ├── *.e2e-spec.ts           # End-to-end tests
 │   ├── jest-e2e.json           # E2E test configuration
 │   └── setup-e2e.ts            # E2E test setup
 ├── prometheus/
 │   └── prometheus.yml          # Prometheus configuration
-├── docker-compose.yml          # Main Docker Compose
-├── docker-compose.dev.yml      # Development environment
-├── docker-compose.prod.yml     # Production environment
+├── docker-compose*.yml         # Docker Compose configurations (dev, prod)
 └── Dockerfile                  # Container definition
 ```
 
