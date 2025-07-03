@@ -4,13 +4,13 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
-import { ApiModule } from './api/api.module';
-import { AuthController } from './api/controllers/auth.controller';
-import { HelloController } from './api/controllers/hello.controller';
-import { ProfileController } from './api/controllers/profile.controller';
-import { LoggerMiddleware } from './application/middlewere/logger.middleware';
-import { TerminusOptionsService } from './infrastructure/health/terminus-options.check';
-import { ApplicationModule } from './application/application.module';
+import { ApiModule } from '@api/api.module';
+import { AuthController } from '@api/controllers/auth.controller';
+import { HelloController } from '@api/controllers/hello.controller';
+import { ProfileController } from '@api/controllers/profile.controller';
+import { LoggerMiddleware } from '@application/middlewere/logger.middleware';
+import { TerminusOptionsService } from '@infrastructure/health/terminus-options.check';
+import { ApplicationModule } from '@application/application.module';
 
 @Module({
   imports: [
