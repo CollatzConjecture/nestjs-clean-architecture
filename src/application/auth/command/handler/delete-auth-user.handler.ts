@@ -25,7 +25,8 @@ export class DeleteAuthUserHandler implements ICommandHandler<DeleteAuthUserComm
         
         this.logger.warning(`COMPENSATING ACTION: Deleting auth user ${authId} and associated profile ${profileId}`, context);
         
-        const userExists = await this.authDomainService.userExistsForDeletion(authId);
+        const user = await this.authRepository.findById(authId);
+        const userExists = this.authDomainService.userExistsForDeletion(user);
         if (!userExists) {
             this.logger.warning(`Auth user ${authId} not found for deletion`, context);
             return;

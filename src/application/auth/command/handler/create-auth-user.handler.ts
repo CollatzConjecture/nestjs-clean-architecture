@@ -25,7 +25,8 @@ export class CreateAuthUserHandler implements ICommandHandler<CreateAuthUserComm
 
     this.authDomainService.validateUserCreation(registerAuthDto);
     
-    const canCreate = await this.authDomainService.canCreateUser(email);
+    const existingUser = await this.authRepository.findByEmail(email);
+    const canCreate = this.authDomainService.canCreateUser(existingUser);
     if (!canCreate) {
       this.logger.warning(`Registration failed - email already exists: ${email}`, context);
       throw new ConflictException('An account with this email already exists.');

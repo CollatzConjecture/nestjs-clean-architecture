@@ -15,11 +15,7 @@ export const Sagas = [RegistrationSaga];
   imports: [CqrsModule, DatabaseModule],
   providers: [
     ProfileService,
-    {
-      provide: ProfileDomainService,
-      useFactory: (profileRepo) => new ProfileDomainService(profileRepo),
-      inject: ['IProfileRepository'],
-    },
+    ProfileDomainService,
     {
       provide: 'IProfileRepository',
       useClass: ProfileRepository,

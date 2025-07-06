@@ -33,11 +33,7 @@ export const CommandHandlers = [CreateAuthUserHandler, DeleteAuthUserHandler];
     JwtStrategy,
     GoogleStrategy,
     AuthService,
-    {
-      provide: AuthDomainService,
-      useFactory: (authRepo) => new AuthDomainService(authRepo),
-      inject: ['IAuthRepository'],
-    },
+    AuthDomainService,
     {
       provide: 'IAuthRepository',
       useClass: AuthRepository,

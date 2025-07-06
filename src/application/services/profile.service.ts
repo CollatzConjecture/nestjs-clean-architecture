@@ -17,14 +17,26 @@ export class ProfileService {
   ) {}
 
   async create(createProfileDto: CreateProfileDto): Promise<Profile> {
-    this.logger.logger(`Creating profile.`, { module: 'ProfileService', method: 'create' });
-    
-    return await this.profileDomainService.createProfile({
+    this.logger.logger(`Creating profile.`, {
+      module: 'ProfileService',
+      method: 'create',
+    });
+
+    const existingProfile = await this.repository.findByAuthId(
+      createProfileDto.authId,
+    );
+    if (!this.profileDomainService.canCreateProfile(existingProfile)) {
+      throw new Error('Profile already exists for this user');
+    }
+
+    const profileEntity = this.profileDomainService.createProfileEntity({
       authId: createProfileDto.authId,
       name: createProfileDto.name,
       lastname: createProfileDto.lastname,
       age: createProfileDto.age,
     });
+
+    return await this.repository.create(profileEntity);
   }
 
   async find(): Promise<Profile[]> {
@@ -45,20 +57,27 @@ export class ProfileService {
     return this.repository.findByRole(role);
   }
 
-  async updateMyProfile(updates: Partial<Profile>, requestingUserId: string): Promise<Profile> {
-    this.logger.logger(`User ${requestingUserId} updating their own profile`, { module: 'ProfileService', method: 'updateMyProfile' });
-    
+  async updateMyProfile(
+    updates: Partial<Profile>,
+    requestingUserId: string,
+  ): Promise<Profile> {
+    this.logger.logger(`User ${requestingUserId} updating their own profile`, {
+      module: 'ProfileService',
+      method: 'updateMyProfile',
+    });
+
     const profile = await this.repository.findByAuthId(requestingUserId);
     if (!profile) {
       throw new Error('Profile not found for current user');
     }
 
-    this.profileDomainService.validateProfileUpdate(updates);
-    
-    return await this.repository.update(profile.id, updates);
+    const validatedUpdates = this.profileDomainService.validateProfileUpdate(
+      profile,
+      updates,
+    );
+
+    return await this.repository.update(profile.id, validatedUpdates);
   }
-
-
 
   async isProfileComplete(profileId: string): Promise<boolean> {
     const profile = await this.repository.findById(profileId);
@@ -68,4 +87,4 @@ export class ProfileService {
 
     return this.profileDomainService.isProfileComplete(profile);
   }
-} 
+}

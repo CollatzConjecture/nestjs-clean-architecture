@@ -1,39 +1,30 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Profile } from '@domain/entities/Profile';
-import { IProfileRepository } from '@domain/interfaces/repositories/profile-repository.interface';
 
 /**
  * Domain Service for Profile Business Logic
  * Contains pure business rules and logic
  */
 export class ProfileDomainService {
-  constructor(
-    private readonly profileRepo: IProfileRepository
-  ) { }
-
   /**
    * Business Logic: Validate if profile can be created
+   * @param existingProfile - Profile data from repository (passed by application layer)
    */
-  async canCreateProfile(authId: string): Promise<boolean> {
-    const existingProfile = await this.profileRepo.findByAuthId(authId);
+  canCreateProfile(existingProfile: Profile | null): boolean {
     return !existingProfile;
   }
 
   /**
-   * Business Logic: Create profile with business validation
+   * Business Logic: Create profile entity with business validation
+   * @param profileData - Profile creation data
+   * @returns Profile entity ready for persistence
    */
-  async createProfile(profileData: {
+  createProfileEntity(profileData: {
     authId: string;
     name: string;
     lastname: string;
     age?: number;
-  }): Promise<Profile> {
-
-    // Business rule: Each auth user can only have one profile
-    if (!(await this.canCreateProfile(profileData.authId))) {
-      throw new Error('Profile already exists for this user');
-    }
-
+  }): Profile {
     this.validateProfileData(profileData);
 
     const profile: Profile = {
@@ -44,14 +35,19 @@ export class ProfileDomainService {
       age: profileData.age || 0,
     };
 
-    return await this.profileRepo.create(profile);
+    return profile;
   }
 
   /**
-   * Business Logic: Update profile with business validation
+   * Business Logic: Validate profile update data before persistence
+   * @param existingProfile - Current profile data
+   * @param updates - Updates to apply
+   * @returns Validated updates
    */
-  async updateProfile(profileId: string, updates: Partial<Profile>): Promise<Profile> {
-    const existingProfile = await this.profileRepo.findById(profileId);
+  validateProfileUpdate(
+    existingProfile: Profile,
+    updates: Partial<Profile>,
+  ): Partial<Profile> {
     if (!existingProfile) {
       throw new Error('Profile not found');
     }
@@ -68,20 +64,28 @@ export class ProfileDomainService {
       this.validateLastname(updates.lastname);
     }
 
-    return await this.profileRepo.update(profileId, updates);
+    return updates;
   }
 
   /**
    * Business Logic: Check if profile can be updated
+   * @param profile - Profile to update
+   * @param requestingUserId - User requesting the update
+   * @param isAdmin - Whether the requesting user is admin
    */
-  canUpdateProfile(profile: Profile, requestingUserId: string, isAdmin: boolean): boolean {
+  canUpdateProfile(
+    profile: Profile,
+    requestingUserId: string,
+    isAdmin: boolean,
+  ): boolean {
     return profile.authId === requestingUserId || isAdmin;
   }
 
   /**
    * Business Logic: Validate profile update data
+   * @param updates - Updates to validate
    */
-  validateProfileUpdate(updates: Partial<Profile>): void {
+  validateProfileUpdateData(updates: Partial<Profile>): void {
     if (updates.name !== undefined) {
       this.validateName(updates.name);
     }
@@ -95,6 +99,7 @@ export class ProfileDomainService {
 
   /**
    * Business Logic: Check if profile is complete
+   * @param profile - Profile to check
    */
   isProfileComplete(profile: Profile): boolean {
     return !!(profile.name && profile.lastname && profile.age > 0);
@@ -102,8 +107,13 @@ export class ProfileDomainService {
 
   /**
    * Business Logic: Validate profile data
+   * @param profileData - Profile data to validate
    */
-  validateProfileData(profileData: { name: string; lastname: string; age?: number }): void {
+  validateProfileData(profileData: {
+    name: string;
+    lastname: string;
+    age?: number;
+  }): void {
     this.validateName(profileData.name);
     this.validateLastname(profileData.lastname);
     if (profileData.age !== undefined) {
@@ -113,8 +123,9 @@ export class ProfileDomainService {
 
   /**
    * Business Logic: Validate name
+   * @param name - Name to validate
    */
-  private validateName(name: string): void {
+  validateName(name: string): void {
     if (!name || name.trim().length < 2) {
       throw new Error('Name must be at least 2 characters long');
     }
@@ -122,8 +133,9 @@ export class ProfileDomainService {
 
   /**
    * Business Logic: Validate lastname
+   * @param lastname - Lastname to validate
    */
-  private validateLastname(lastname: string): void {
+  validateLastname(lastname: string): void {
     if (!lastname || lastname.trim().length < 2) {
       throw new Error('Lastname must be at least 2 characters long');
     }
@@ -131,8 +143,9 @@ export class ProfileDomainService {
 
   /**
    * Business Logic: Validate age
+   * @param age - Age to validate
    */
-  private validateAge(age: number): void {
+  validateAge(age: number): void {
     if (age < 0 || age > 150) {
       throw new Error('Age must be between 0 and 150');
     }
@@ -140,8 +153,9 @@ export class ProfileDomainService {
 
   /**
    * Business Logic: Generate profile ID
+   * @returns Generated profile ID
    */
   generateProfileId(): string {
     return 'profile-' + uuidv4();
   }
-} 
+}
