@@ -13,6 +13,7 @@ If you want more documentation about NestJS, click here [Nest](https://github.co
 ## 🚀 Features
 
 ### Core Architecture
+
 - **Clean Architecture**: Enforces strict separation of concerns with proper dependency direction (Infrastructure → Application → Domain).
 - **Domain-Driven Design (DDD)**: Pure business logic encapsulated in Domain Services, accessed through Repository Interfaces.
 - **CQRS**: Segregates read (Queries) and write (Commands) operations for optimized performance and scalability.
@@ -21,12 +22,14 @@ If you want more documentation about NestJS, click here [Nest](https://github.co
 - **Dependency Inversion**: Domain layer depends only on abstractions, never on concrete implementations.
 
 ### Proper Layer Separation
+
 - **Domain Layer**: Pure business logic, domain entities without framework dependencies, repository interfaces
 - **Application Layer**: Business orchestration, application services, CQRS coordination, framework-agnostic services
 - **API Layer**: HTTP controllers, DTOs, request/response handling, framework-specific HTTP concerns
 - **Infrastructure Layer**: Database implementations, external API calls, concrete repository classes, global services
 
 ### Security & Authentication
+
 - **JWT Authentication**: Implements secure, token-based authentication with refresh token rotation.
 - **Google OAuth2 Integration**: Secure third-party authentication with Google accounts, including CSRF protection.
 - **Role-Based Access Control (RBAC)**: Complete implementation with protected routes and role-based guards.
@@ -36,6 +39,7 @@ If you want more documentation about NestJS, click here [Nest](https://github.co
 - **CSRF Protection**: OAuth flows protected against Cross-Site Request Forgery attacks using state parameters.
 
 ### Infrastructure & Operations
+
 - **MongoDB Integration**: Utilizes Mongoose for structured data modeling with a NoSQL database.
 - **Containerized Environment**: Full Docker and Docker Compose setup for development and production.
 - **Health Checks**: Provides application health monitoring endpoints via Terminus.
@@ -45,6 +49,7 @@ If you want more documentation about NestJS, click here [Nest](https://github.co
 - **Request Throttling**: Built-in rate limiting to prevent abuse and ensure API stability.
 
 ### Testing
+
 - **Unit & Integration Tests**: A suite of tests for domain, application, and infrastructure layers.
 - **E2E Tests**: End-to-end tests to ensure API functionality from request to response.
 - **High Test Coverage**: Configured to report and maintain high code coverage.
@@ -58,6 +63,7 @@ cd nestjs-clean-architecture
 ```
 
 ### 📁 Project Structure
+
 ```
 .
 ├── doc/
@@ -151,6 +157,7 @@ cd nestjs-clean-architecture
 ## 🏗️ Architecture Overview
 
 ### Layer Architecture
+
 This project follows a strict 4-layer architecture:
 
 1. **API Layer** (`src/api/`): HTTP controllers, DTOs, and request/response handling
@@ -159,6 +166,7 @@ This project follows a strict 4-layer architecture:
 4. **Infrastructure Layer** (`src/infrastructure/`): Database, external services, and technical implementations
 
 ### Module Structure
+
 - **ApiModule**: Aggregates all HTTP controllers and imports ApplicationModule
 - **ApplicationModule**: Central orchestrator that imports and exports feature modules
 - **AuthModule**: Self-contained authentication feature with all its dependencies
@@ -166,38 +174,44 @@ This project follows a strict 4-layer architecture:
 - **LoggerModule**: Global infrastructure service for application-wide logging
 
 ### CQRS Implementation
+
 - **Commands**: Handle write operations (Create, Update, Delete). Located in `src/application/*/command`.
 - **Queries**: Handle read operations (Find, Get). Located in `src/application/*/query`.
 - **Handlers**: Process commands and queries separately with proper business-context logging.
 - **Events**: Publish domain events for side effects and inter-module communication.
 
 ### Event-Driven Flow
+
 1. **User Registration**:
+
    ```
-   API Controller → Application Service → Domain Service (validation) → 
-   RegisterCommand → CreateAuthUser → AuthUserCreated Event → 
+   API Controller → Application Service → Domain Service (validation) →
+   RegisterCommand → CreateAuthUser → AuthUserCreated Event →
    RegistrationSaga → CreateProfile → ProfileCreated
    ```
 
 2. **Authentication**:
+
    ```
    API Controller → Application Service → Domain Service (email validation) →
    LoginCommand → ValidateUser → JWT Token Generation
    ```
 
 3. **Google OAuth Flow**:
+
    ```
-   /auth/google → Google OAuth → /auth/google/redirect → 
+   /auth/google → Google OAuth → /auth/google/redirect →
    Domain Service (validation) → FindOrCreateUser → JWT Token Generation
    ```
 
 4. **Error Handling**:
    ```
-   ProfileCreationFailed Event → RegistrationSaga → 
+   ProfileCreationFailed Event → RegistrationSaga →
    DeleteAuthUser (Compensating Transaction)
    ```
 
 ### Dependency Injection & Module Boundaries
+
 - **Feature Modules**: Each feature (Auth, Profile) manages its own dependencies
 - **Domain Services**: Injected via factories to maintain Clean Architecture principles
 - **Repository Pattern**: Interfaces defined in domain, implementations in infrastructure
@@ -232,6 +246,7 @@ $ npm run docker:restart
 ```
 
 ### 🌐 Service Access
+
 - **Application**: http://localhost:4000
 - **API Documentation (Swagger)**: http://localhost:4000/api
 - **MongoDB**: localhost:27017
@@ -276,12 +291,37 @@ $ npm run test:cov
 $ npm run test:watch
 ```
 
+## 🧪 API Testing
+
+You can import this [Postman collection](./NestJS%20CA-DDD.postman_collection.json) to test the API endpoints.
+
+The collection includes:
+
+- **Authentication endpoints**: Register, login, logout, Google OAuth
+- **Profile management**: Create, read, update profile data
+- **Protected routes**: Examples with JWT token authentication
+- **Admin endpoints**: Role-based access control examples
+- **Environment variables**: Pre-configured for localhost development
+
+### Using the Postman Collection
+
+1. **Import the collection**: Download and import `NestJS CA-DDD.postman_collection.json` into Postman
+2. **Set environment variables**: Configure the following variables in Postman:
+   - `localhost`: `http://localhost` (or your host)
+   - `port`: `4000` (or your configured port)
+   - `Authorization`: `Bearer <your-jwt-token>` (set after login)
+3. **Test the flow**:
+   - Start with user registration
+   - Login to get JWT token
+   - Use the token for protected endpoints
+
 ## 🔐 API Endpoints
 
 ### Authentication
+
 ```http
 POST /auth/register       # User registration
-POST /auth/login          # User login  
+POST /auth/login          # User login
 POST /auth/logout         # User logout (Protected)
 POST /auth/refresh-token  # Token refresh (Protected)
 GET  /auth/google         # Initiate Google OAuth login
@@ -291,14 +331,16 @@ DELETE /auth/:id          # Delete user by auth ID (Protected)
 ```
 
 ### Profile Management (Protected)
+
 ```http
 GET  /profile/all         # Get all user profiles (Admin only)
-GET  /profile/admins      # Get all admin users (Admin only)  
+GET  /profile/admins      # Get all admin users (Admin only)
 GET  /profile/:id         # Get user profile by ID
 POST /profile             # Create a new profile
 ```
 
 ### Health & Monitoring
+
 ```http
 GET  /hello               # Health check endpoint
 GET  /health              # Detailed health check
@@ -308,6 +350,7 @@ GET  /metrics             # Prometheus metrics
 ### Example Usage
 
 #### Traditional Registration & Login
+
 ```bash
 # Register a new user
 curl -X POST http://localhost:4000/auth/register \
@@ -330,6 +373,7 @@ curl -X POST http://localhost:4000/auth/login \
 ```
 
 #### Google OAuth Login
+
 ```bash
 # Initiate Google login (redirects to Google)
 curl -X GET http://localhost:4000/auth/google
@@ -339,6 +383,7 @@ curl -X GET http://localhost:4000/auth/google
 ```
 
 #### Protected Routes
+
 ```bash
 # Access protected route
 curl -X GET http://localhost:4000/profile/123 \
@@ -352,14 +397,17 @@ curl -X GET http://localhost:4000/profile/all \
 ## 🛠️ Built With
 
 ### Core Framework
+
 - **[NestJS](https://nestjs.com/)** - Progressive Node.js framework
 - **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript
 
 ### Architecture & Patterns
+
 - **[@nestjs/cqrs](https://docs.nestjs.com/recipes/cqrs)** - CQRS implementation
 - **[@nestjs/event-emitter](https://docs.nestjs.com/techniques/events)** - Event handling
 
 ### Authentication & Security
+
 - **[@nestjs/jwt](https://docs.nestjs.com/security/authentication)** - JWT implementation
 - **[@nestjs/passport](https://docs.nestjs.com/security/authentication)** - Authentication strategies
 - **[@nestjs/throttler](https://docs.nestjs.com/security/rate-limiting)** - Rate limiting
@@ -367,37 +415,45 @@ curl -X GET http://localhost:4000/profile/all \
 - **[cookie-parser](https://www.npmjs.com/package/cookie-parser)** - Cookie handling for OAuth state
 
 ### Database & Storage
+
 - **[Mongoose](https://mongoosejs.com/)** - MongoDB object modeling
 - **[MongoDB](https://www.mongodb.com/)** - Document database
 
 ### Monitoring & Health
+
 - **[@nestjs/terminus](https://docs.nestjs.com/recipes/terminus)** - Health checks
 - **[Prometheus](https://prometheus.io/)** - Metrics collection
 - **[Grafana](https://grafana.com/)** - Metrics visualization
 
 ### Testing
+
 - **[Jest](https://jestjs.io/)** - Testing framework
 - **[Supertest](https://www.npmjs.com/package/supertest)** - HTTP assertion library
 
 ### Development Tools
+
 - **[Nodemon](https://nodemon.io/)** - Development server
 - **[Docker](https://www.docker.com/)** - Containerization
 
 ## 🏛️ Domain-Driven Design
 
 ### Bounded Contexts
+
 - **Authentication Context**: User login, registration, tokens, OAuth integration
 - **Profile Context**: User profile management, personal data
 
 ### Aggregates
+
 - **UserAggregate**: Manages user lifecycle and events across auth and profile contexts
 
 ### Domain Events
+
 - `AuthUserCreatedEvent`: Triggered after successful user creation
 - `AuthUserDeletedEvent`: Triggered when user is deleted (compensating action)
 - `ProfileCreationFailedEvent`: Triggered when profile creation fails
 
 ### Sagas
+
 - **RegistrationSaga**: Orchestrates user registration process
   - Handles profile creation after auth user creation
   - Implements compensating transactions for failures
@@ -406,17 +462,20 @@ curl -X GET http://localhost:4000/profile/all \
 ## 📈 Monitoring & Observability
 
 ### Structured Logging
+
 - **Business-Context Logging**: Logs focus on business events rather than technical execution
 - **Dependency Injection**: Logger service is injected throughout the application
 - **Consistent Format**: All logs include module, method, and timestamp information
 - **Security Audit Trail**: Comprehensive logging of authentication attempts and outcomes
 
 ### Health Checks
+
 - Database connectivity
 - Memory usage
 - Disk space
 
 ### Metrics (Prometheus)
+
 - HTTP request duration
 - Request count by endpoint
 - Error rates
@@ -424,6 +483,7 @@ curl -X GET http://localhost:4000/profile/all \
 - Authentication success/failure rates
 
 ### Dashboards (Grafana)
+
 - Application performance metrics
 - Database statistics
 - Error tracking
@@ -433,6 +493,7 @@ curl -X GET http://localhost:4000/profile/all \
 ## ⚙️ Configuration
 
 1.  **Clone the repository:**
+
     ```bash
     git clone https://github.com/CollatzConjecture/nestjs-clean-architecture
     cd nestjs-clean-architecture
@@ -441,6 +502,7 @@ curl -X GET http://localhost:4000/profile/all \
 2.  **Create an environment file:**
 
     Create a file named `.env` in the root of the project by copying the example file.
+
     ```bash
     cp .env.example .env
     ```
@@ -448,10 +510,13 @@ curl -X GET http://localhost:4000/profile/all \
 3.  **Generate Secrets:**
 
     Your `.env` file requires several secret keys to run securely. Use the following command to generate a cryptographically strong secret:
+
     ```bash
     node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
     ```
+
     Run this command for each of the following variables in your `.env` file and paste the result:
+
     - `JWT_SECRET`
     - `JWT_REFRESH_SECRET`
     - `EMAIL_ENCRYPTION_KEY`
@@ -462,18 +527,19 @@ curl -X GET http://localhost:4000/profile/all \
 4.  **Configure Google OAuth2 (Optional):**
 
     To enable Google login functionality, you'll need to:
-    
+
     a. Go to the [Google Cloud Console](https://console.cloud.google.com/)
-    
+
     b. Create a new project or select an existing one
-    
+
     c. Enable the Google+ API
-    
+
     d. Create OAuth 2.0 credentials (Web application type)
-    
+
     e. Add your redirect URI: `http://localhost:4000/auth/google/redirect`
-    
+
     f. Add the following to your `.env` file:
+
     ```env
     GOOGLE_CLIENT_ID=your_google_client_id_here
     GOOGLE_CLIENT_SECRET=your_google_client_secret_here
@@ -483,12 +549,14 @@ curl -X GET http://localhost:4000/profile/all \
 ## 🔒 Security Features
 
 ### Authentication Security
+
 - **JWT with Refresh Tokens**: Secure token-based authentication with automatic refresh
 - **Password Security**: Bcrypt hashing with configurable salt rounds
 - **OAuth2 Security**: CSRF protection using state parameters in OAuth flows
 - **Rate Limiting**: Configurable throttling on sensitive endpoints
 
 ### Data Protection
+
 - **Encryption at Rest**: Sensitive data encrypted using AES-256-CBC
 - **Blind Indexing**: Secure querying of encrypted data
 - **Input Validation**: Comprehensive DTO validation using class-validator
@@ -496,13 +564,14 @@ curl -X GET http://localhost:4000/profile/all \
 - **Automatic Timestamps**: All models include `createdAt` and `updatedAt` for audit trails
 
 ### Access Control
+
 - **Role-Based Authorization**: Complete RBAC implementation with guards
 - **Route Protection**: JWT guards on sensitive endpoints
 - **Admin Controls**: Separate endpoints for administrative functions
 
 ## 👨‍💻 Authors
 
-- **Jerry Lucas** - *Current Maintainer* - [GitHub](https://github.com/CollatzConjecture)
+- **Jerry Lucas** - _Current Maintainer_ - [GitHub](https://github.com/CollatzConjecture)
 
 ## 📄 License
 

@@ -1,0 +1,404 @@
+{
+	"info": {
+		"_postman_id": "6d649d84-02ef-42e6-95b7-b4732d194e50",
+		"name": "NestJS CA/DDD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40738531"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"muskelon@gmail.com\",\n    \"password\": \"mySecurePassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localhost}}:{{port}}/api/v1/auth/login",
+							"host": [
+								"{{localhost}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Authorization}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"auth-d5c1eaf7-a7b6-4126-9682-4f52372bfcb2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localhost}}:{{port}}/api/v1/auth/logout",
+							"host": [
+								"{{localhost}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Elom\",\n    \"lastname\": \"Musk\",\n    \"age\": 23,\n    \"email\": \"muskelon@gmail.com\",\n    \"password\": \"mySecurePassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localhost}}:{{port}}/api/v1/auth/register",
+							"host": [
+								"{{localhost}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Auth By Id",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Authorization}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{localhost}}:{{port}}/api/v1/auth/auth-e1d66bc0-f5f4-495a-b391-55ab529920d1",
+							"host": [
+								"{{localhost}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"auth-e1d66bc0-f5f4-495a-b391-55ab529920d1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete By Id",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Authorization}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{localhost}}:{{port}}/api/v1/auth/auth-a9a3fc7e-97f5-48dd-a46c-9f6d39d96f07",
+							"host": [
+								"{{localhost}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"auth-a9a3fc7e-97f5-48dd-a46c-9f6d39d96f07"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Profile",
+			"item": [
+				{
+					"name": "Profiles",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Authorization}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{localhost}}:{{port}}/api/v1/profile/all",
+							"host": [
+								"{{localhost}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"profile",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Profile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Authorization}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Testing 2\",\n    \"lastname\": \"Test\",\n    \"age\": 23\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localhost}}:{{port}}/api/v1/profile",
+							"host": [
+								"{{localhost}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Authorization}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Jerry\",\n    \"lastname\": \"Lucas\",\n    \"age\": 24\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localhost}}:{{port}}/api/v1/profile/me",
+							"host": [
+								"{{localhost}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"profile",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Authorization}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{localhost}}:{{port}}/api/v1/profile/profile-b5d12316-cdbd-4ce8-aa0c-581644d10ee8",
+							"host": [
+								"{{localhost}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"profile",
+								"profile-b5d12316-cdbd-4ce8-aa0c-581644d10ee8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Admins",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Authorization}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{localhost}}:{{port}}/api/v1/profile/admins",
+							"host": [
+								"{{localhost}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"v1",
+								"profile",
+								"admins"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Hello",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "header",
+							"value": "{}",
+							"type": "string"
+						},
+						{
+							"key": "payload",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "secret",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{localhost}}:{{port}}/api/v1/hello",
+					"host": [
+						"{{localhost}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"v1",
+						"hello"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
