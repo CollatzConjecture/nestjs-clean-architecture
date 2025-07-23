@@ -8,6 +8,9 @@ import { ProfileModel } from '@infrastructure/models/profile.model';
 import { Profile } from '@domain/entities/Profile';
 import { PROFILE_MODEL_PROVIDER } from '@constants';
 import { ProfileRepository } from '@infrastructure/repository/profile.repository';
+import { LoggerService } from '@application/services/logger.service';
+import { ProfileDomainService } from '@domain/services/profile-domain.service';
+import { ResponseService } from '@application/services/response.service';
 
 describe('Profile Controller', () => {
   let controller: ProfileController;
@@ -15,18 +18,49 @@ describe('Profile Controller', () => {
   const profileModel: any = ProfileModel;
 
   beforeAll(async () => {
+    const mockProfileModel = {
+      new: jest.fn().mockResolvedValue({}),
+      constructor: jest.fn().mockResolvedValue({}),
+      find: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue([]),
+      }),
+      findOne: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      }),
+      findOneAndUpdate: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue({}),
+      }),
+      aggregate: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue([]),
+      }),
+      create: jest.fn().mockResolvedValue({}),
+      save: jest.fn().mockResolvedValue({}),
+      deleteOne: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue({}),
+      }),
+    };
+
     const profileProviders = {
       provide: PROFILE_MODEL_PROVIDER,
-      useValue: profileModel,
+      useValue: mockProfileModel,
     };
 
     const module: TestingModule = await Test
       .createTestingModule({
         controllers: [ProfileController],
         providers: [
-          ProfileService,
-          ProfileRepository,
-          profileProviders,
+          {
+            provide: ProfileService,
+            useValue: {
+              create: jest.fn(),
+              find: jest.fn(),
+              findById: jest.fn(),
+              findByRole: jest.fn(),
+              updateMyProfile: jest.fn(),
+              isProfileComplete: jest.fn(),
+            },
+          },
+          ResponseService,
         ],
       })
       .compile();
@@ -47,10 +81,9 @@ describe('Profile Controller', () => {
     jest.spyOn(service, 'create').mockImplementation(async () => profile);
     const data = await controller.create(newProfile);
     expect(data).toBeDefined();
-    expect(has(data, 'id')).toBeTruthy();
-    Object.keys(data).forEach((key) => {
-      expect(data[key]).toBe(profile[key]);
-    });
+    expect(has(data, 'data')).toBeTruthy();
+    expect(data.data.id).toBe(profile.id);
+    expect(data.message).toBe('Profile created successfully');
   });
 
   it('should return all profiles', async () => {
@@ -70,11 +103,13 @@ describe('Profile Controller', () => {
         age: faker.number.int({ min: 18, max: 80 }),
       },
     ];
-    
+
     jest.spyOn(service, 'find').mockImplementation(async () => profiles);
     const data = await controller.getAll();
     expect(data).toBeDefined();
-    expect(Array.isArray(data)).toBeTruthy();
-    expect(data.length).toBe(2);
+    expect(has(data, 'data')).toBeTruthy();
+    expect(Array.isArray(data.data)).toBeTruthy();
+    expect(data.data.length).toBe(2);
+    expect(data.message).toBe('All profiles retrieved successfully');
   });
 });

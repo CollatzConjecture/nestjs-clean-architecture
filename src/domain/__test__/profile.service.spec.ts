@@ -5,38 +5,64 @@ import { ProfileRepository } from '@infrastructure/repository/profile.repository
 import { Test } from '@nestjs/testing';
 import { TestingModule } from '@nestjs/testing/testing-module';
 import { cloneDeep } from 'lodash';
+import { LoggerService } from '@application/services/logger.service';
+import { ProfileDomainService } from '@domain/services/profile-domain.service';
 
 describe('User Service', () => {
   let service: ProfileService;
-  let repository: ProfileRepository;
 
   beforeAll(async () => {
+    const MockProfileModel: any = jest.fn().mockImplementation((data) => ({
+      save: jest.fn().mockResolvedValue({
+        toObject: jest.fn().mockReturnValue(data),
+      }),
+      toObject: jest.fn().mockReturnValue(data),
+      ...data,
+    }));
+    
+    MockProfileModel.find = jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue([]),
+    });
+    MockProfileModel.findOne = jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue(null),
+    });
+    MockProfileModel.findOneAndUpdate = jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue({
+        toObject: jest.fn().mockReturnValue({}),
+      }),
+    });
+    MockProfileModel.aggregate = jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue([]),
+    });
+    MockProfileModel.create = jest.fn().mockResolvedValue({
+      toObject: jest.fn().mockReturnValue({}),
+    });
+    MockProfileModel.deleteOne = jest.fn().mockReturnValue({
+      exec: jest.fn().mockResolvedValue({}),
+    });
+
     const userProviders = {
       provide: PROFILE_MODEL_PROVIDER,
-      useValue: {
-        new: jest.fn().mockResolvedValue({}),
-        constructor: jest.fn().mockResolvedValue({}),
-        find: jest.fn(),
-        findOne: jest.fn(),
-        update: jest.fn(),
-        create: jest.fn(),
-        remove: jest.fn(),
-        exec: jest.fn(),
-      },
+      useValue: MockProfileModel,
     };
 
     const module: TestingModule = await Test
       .createTestingModule({
         providers: [
           ProfileService,
-          ProfileRepository,
           userProviders,
+          ProfileRepository,
+          {
+            provide: 'IProfileRepository',
+            useClass: ProfileRepository,
+          },
+          LoggerService,
+          ProfileDomainService,
         ],
       })
       .compile();
 
     service = module.get<ProfileService>(ProfileService);
-    repository = module.get<ProfileRepository>(ProfileRepository);
   });
 
   it('should create a user', async () => {
@@ -45,17 +71,17 @@ describe('User Service', () => {
       authId: faker.string.uuid(),
       name: faker.person.fullName(),
       lastname: faker.person.lastName(),
-      age: faker.number.int(),
+      age: faker.number.int({ min: 18, max: 80 }),
     };
 
     const newUser = cloneDeep(user);
-    jest.spyOn(repository, 'create').mockImplementation(async () => user);
     const data = await service.create(newUser);
     expect(data).toBeDefined();
     expect(data.id).toBeDefined();
-    Object.keys(data).forEach((key) => {
-      expect(data[key]).toBe(user[key]);
-    });
+    expect(data.authId).toBe(user.authId);
+    expect(data.name).toBe(user.name);
+    expect(data.lastname).toBe(user.lastname);
+    expect(data.age).toBe(user.age);
   });
 });
 
