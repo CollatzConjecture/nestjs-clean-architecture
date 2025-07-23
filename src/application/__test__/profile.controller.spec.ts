@@ -1,21 +1,16 @@
-import { faker } from '@faker-js/faker';
-import { Test } from '@nestjs/testing';
-import { has, cloneDeep } from 'lodash';
-import { TestingModule } from '@nestjs/testing/testing-module';
 import { ProfileController } from '@api/controllers/profile.controller';
 import { ProfileService } from '@application/services/profile.service';
-import { ProfileModel } from '@infrastructure/models/profile.model';
-import { Profile } from '@domain/entities/Profile';
-import { PROFILE_MODEL_PROVIDER } from '@constants';
-import { ProfileRepository } from '@infrastructure/repository/profile.repository';
-import { LoggerService } from '@application/services/logger.service';
-import { ProfileDomainService } from '@domain/services/profile-domain.service';
 import { ResponseService } from '@application/services/response.service';
+import { PROFILE_MODEL_PROVIDER } from '@constants';
+import { Profile } from '@domain/entities/Profile';
+import { faker } from '@faker-js/faker';
+import { Test } from '@nestjs/testing';
+import { TestingModule } from '@nestjs/testing/testing-module';
+import { cloneDeep, has } from 'lodash';
 
 describe('Profile Controller', () => {
   let controller: ProfileController;
   let service: ProfileService;
-  const profileModel: any = ProfileModel;
 
   beforeAll(async () => {
     const mockProfileModel = {
@@ -38,11 +33,6 @@ describe('Profile Controller', () => {
       deleteOne: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue({}),
       }),
-    };
-
-    const profileProviders = {
-      provide: PROFILE_MODEL_PROVIDER,
-      useValue: mockProfileModel,
     };
 
     const module: TestingModule = await Test

@@ -1,12 +1,12 @@
-import { PROFILE_MODEL_PROVIDER } from '@constants';
+import { LoggerService } from '@application/services/logger.service';
 import { ProfileService } from '@application/services/profile.service';
+import { PROFILE_MODEL_PROVIDER } from '@constants';
+import { ProfileDomainService } from '@domain/services/profile-domain.service';
 import { faker } from '@faker-js/faker';
 import { ProfileRepository } from '@infrastructure/repository/profile.repository';
 import { Test } from '@nestjs/testing';
 import { TestingModule } from '@nestjs/testing/testing-module';
 import { cloneDeep } from 'lodash';
-import { LoggerService } from '@application/services/logger.service';
-import { ProfileDomainService } from '@domain/services/profile-domain.service';
 
 describe('User Service', () => {
   let service: ProfileService;

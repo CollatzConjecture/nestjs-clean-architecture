@@ -3,13 +3,17 @@
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
+  "preset": "ts-jest",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.(t|j)s$": ["ts-jest", {
+      "tsconfig": "<rootDir>/../tsconfig.json"
+    }]
   },
   "moduleNameMapper": {
     "^@domain/(.*)$": "<rootDir>/../src/domain/$1",
-    "^@application/(.*)$": "<rootDir>/../src/application/$1",
+    "^@application/(.*)$": "<rootDir>/../src/application/$1", 
     "^@infrastructure/(.*)$": "<rootDir>/../src/infrastructure/$1",
+    "^@api/(.*)$": "<rootDir>/../src/api/$1",
     "^@constants$": "<rootDir>/../src/constants"
   },
   "testTimeout": 60000,
