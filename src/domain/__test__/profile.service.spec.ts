@@ -83,5 +83,17 @@ describe('User Service', () => {
     expect(data.lastname).toBe(user.lastname);
     expect(data.age).toBe(user.age);
   });
+
+  it('should find all users', async () => {
+    const data = await service.find();
+    expect(data).toBeDefined();
+    expect(Array.isArray(data)).toBeTruthy();
+  });
+
+  it('should find user by id', async () => {
+    const userId = faker.string.uuid();
+    const data = await service.findById(userId);
+    expect(data).toBeNull(); // Mock returns null
+  });
 });
 

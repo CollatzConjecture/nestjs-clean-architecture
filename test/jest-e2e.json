@@ -18,6 +18,7 @@
   },
   "testTimeout": 60000,
   "setupFilesAfterEnv": ["<rootDir>/setup-e2e.ts"],
-  "forceExit": true,
-  "detectOpenHandles": false
+  "forceExit": false,
+  "detectOpenHandles": true,
+  "openHandlesTimeout": 1000
 }

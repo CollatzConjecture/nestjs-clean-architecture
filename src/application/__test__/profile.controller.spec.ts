@@ -102,4 +102,21 @@ describe('Profile Controller', () => {
     expect(data.data.length).toBe(2);
     expect(data.message).toBe('All profiles retrieved successfully');
   });
+
+  it('should get profile by id', async () => {
+    const profile: Profile = {
+      id: faker.string.uuid(),
+      authId: faker.string.uuid(),
+      name: faker.person.firstName(),
+      lastname: faker.person.lastName(),
+      age: faker.number.int({ min: 18, max: 80 }),
+    };
+
+    jest.spyOn(service, 'findById').mockImplementation(async () => profile);
+    const data = await controller.getProfile(profile.id);
+    expect(data).toBeDefined();
+    expect(has(data, 'data')).toBeTruthy();
+    expect(data.data.id).toBe(profile.id);
+    expect(data.message).toBe('Profile retrieved successfully');
+  });
 });

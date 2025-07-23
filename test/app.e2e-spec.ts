@@ -6,6 +6,7 @@ import { INestApplication, VersioningType } from '@nestjs/common';
 
 describe('App (e2e)', () => {
   let app: INestApplication;
+  let moduleFixture: TestingModule;
   let accessToken: string;
   let isDbConnected = false;
   
@@ -19,7 +20,7 @@ describe('App (e2e)', () => {
 
   beforeAll(async () => {
     try {
-      const moduleFixture: TestingModule = await Test.createTestingModule({
+      moduleFixture = await Test.createTestingModule({
         imports: [AppModule],
       }).compile();
 
@@ -35,23 +36,36 @@ describe('App (e2e)', () => {
       await app.init();
       
       try {
-        await request(app.getHttpServer())
+        // Test database connectivity by trying to register a user
+        const registerResponse = await request(app.getHttpServer())
           .post('/api/v1/auth/register')
-          .send(testUser)
-          .expect(201);
+          .send(testUser);
 
+        if (registerResponse.status !== 201) {
+          throw new Error(`Registration failed with status ${registerResponse.status}`);
+        }
+
+        // Test login functionality
         const loginResponse = await request(app.getHttpServer())
           .post('/api/v1/auth/login')
           .send({
             email: testUser.email,
             password: testUser.password
-          })
-          .expect(200);
+          });
+
+        if (loginResponse.status !== 200) {
+          throw new Error(`Login failed with status ${loginResponse.status}, expected 200`);
+        }
+
+        if (!loginResponse.body.data || !loginResponse.body.data.access_token) {
+          throw new Error('Login response missing access token');
+        }
 
         accessToken = loginResponse.body.data.access_token;
         isDbConnected = true;
+        console.log('✅ Database connection test passed');
       } catch (error) {
-        console.warn('Database connection failed, running limited tests:', error.message);
+        console.warn('⚠️  Database connection failed, running limited tests:', error.message);
         isDbConnected = false;
       }
     } catch (error) {
@@ -61,19 +75,33 @@ describe('App (e2e)', () => {
   }, 60000); // 60 second timeout for setup
 
   afterAll(async () => {
-    if (app) {
-      try {
-        const connection = app.get('DbConnectionToken', { strict: false });
-        if (connection && connection.close) {
-          await connection.close();
+    try {
+      // Close database connections
+      if (app) {
+        try {
+          // Try to get MongoDB connection using the correct token and close it
+          const mongoConnection = app.get('DbConnectionToken', { strict: false });
+          if (mongoConnection && mongoConnection.connection) {
+            await mongoConnection.connection.close();
+          }
+        } catch (error) {
+          // Ignore if connection doesn't exist
         }
-        
+
+        // Close the NestJS application
         await app.close();
-      } catch (error) {
-        console.warn('Error closing app:', error.message);
       }
+
+      // Close the testing module
+      if (moduleFixture) {
+        await moduleFixture.close();
+      }
+    } catch (error) {
+      console.warn('Error during cleanup:', error.message);
     }
-    console.log('E2E tests completed');
+
+    // Give a moment for cleanup to complete
+    await new Promise(resolve => setTimeout(resolve, 100));
   });
 
   describe('Application Bootstrap', () => {
