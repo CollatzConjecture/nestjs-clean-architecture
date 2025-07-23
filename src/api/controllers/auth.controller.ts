@@ -1,22 +1,46 @@
 import { LoginAuthDto } from '@api/dto/auth/login-auth.dto';
+import { RefreshTokenDto } from '@api/dto/auth/refresh-token.dto';
 import { RegisterAuthDto } from '@api/dto/auth/register-auth.dto';
 import { LoggingInterceptor } from '@application/interceptors/logging.interceptor';
 import { AuthService } from '@application/services/auth.service';
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Query, Req, Request, Res, UseGuards, UseInterceptors, Version } from '@nestjs/common';
+import { ResponseService } from '@application/services/response.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  Req,
+  Request,
+  Res,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Request as ExpressRequest, Response } from 'express';
 
 @ApiTags('auth')
 @Controller({
   path: 'auth',
-  version: '1'
+  version: '1',
 })
 @UseGuards(ThrottlerGuard)
 @UseInterceptors(LoggingInterceptor)
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly responseService: ResponseService,
+  ) {}
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
@@ -24,7 +48,11 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'User successfully registered.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   async register(@Body() registerDto: RegisterAuthDto) {
-    return this.authService.register(registerDto);
+    const result = await this.authService.register(registerDto);
+    return this.responseService.created(
+      result,
+      'User registration initiated successfully',
+    );
   }
 
   @Throttle({ default: { limit: 3, ttl: 60000 } })
@@ -33,7 +61,8 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User successfully logged in.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async login(@Body() loginDto: LoginAuthDto) {
-    return this.authService.login(loginDto);
+    const result = await this.authService.login(loginDto);
+    return this.responseService.success('Login successful', result);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -43,7 +72,8 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User successfully logged out.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async logout(@Request() req) {
-    return this.authService.logout(req.user.id);
+    const result = await this.authService.logout(req.user.id);
+    return this.responseService.success(result.message);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -52,15 +82,22 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, description: 'New access token generated.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async refreshToken(@Request() req) {
-    return this.authService.refreshToken(req.user);
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    const result = await this.authService.refreshToken(
+      refreshTokenDto.refresh_token,
+    );
+    return this.responseService.success('Token refreshed successfully', result);
   }
 
   @Get('google')
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
   async googleAuth(@Res() res: Response) {
     const { redirectUrl, state } = this.authService.initiateGoogleAuth();
-    res.cookie('oauth_state', state, { httpOnly: true, secure: true, sameSite: 'lax' });
+    res.cookie('oauth_state', state, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+    });
     res.redirect(redirectUrl);
   }
 
@@ -73,12 +110,19 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const storedState = req.cookies['oauth_state'];
-    const result = await this.authService.handleGoogleRedirect(code, state, storedState);
-    
+    const result = await this.authService.handleGoogleRedirect(
+      code,
+      state,
+      storedState,
+    );
+
     // Clear the cookie after use
     res.clearCookie('oauth_state');
-    
-    return result;
+
+    return this.responseService.success(
+      'Google authentication successful',
+      result,
+    );
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -93,7 +137,10 @@ export class AuthController {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+    return this.responseService.retrieved(
+      user,
+      'User profile retrieved successfully',
+    );
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -103,6 +150,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User deleted successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async deleteUser(@Param('id') id: string) {
-    return this.authService.deleteByAuthId(id);
+    const result = await this.authService.deleteByAuthId(id);
+    return this.responseService.success(result.message);
   }
-} 
+}
