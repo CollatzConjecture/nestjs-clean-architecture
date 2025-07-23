@@ -40,7 +40,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly responseService: ResponseService,
-  ) {}
+  ) { }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
@@ -76,16 +76,12 @@ export class AuthController {
     return this.responseService.success(result.message);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Post('refresh-token')
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, description: 'New access token generated.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    const result = await this.authService.refreshToken(
-      refreshTokenDto.refresh_token,
-    );
+    const result = await this.authService.refreshToken(refreshTokenDto.refresh_token);
     return this.responseService.success('Token refreshed successfully', result);
   }
 

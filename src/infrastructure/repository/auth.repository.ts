@@ -7,7 +7,7 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository {
-  constructor(@Inject(AUTH_MODEL_PROVIDER) private readonly authModel: Model<Auth>) {}
+  constructor(@Inject(AUTH_MODEL_PROVIDER) private readonly authModel: Model<Auth>) { }
 
   async create(authData: Partial<AuthUser>): Promise<AuthUser> {
     const newAuth = new this.authModel(authData);
@@ -41,11 +41,11 @@ export class AuthRepository implements IAuthRepository {
       { $set: authData },
       { new: true }
     ).exec();
-    
+
     if (!updatedAuth) {
       throw new Error('Auth user not found');
     }
-    
+
     return updatedAuth.toObject() as AuthUser;
   }
 
