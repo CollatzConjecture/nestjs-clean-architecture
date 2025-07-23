@@ -119,4 +119,54 @@ describe('Profile Controller', () => {
     expect(data.data.id).toBe(profile.id);
     expect(data.message).toBe('Profile retrieved successfully');
   });
+
+  it('should throw BadRequestException when id is empty', async () => {
+    await expect(controller.getProfile('')).rejects.toThrow('Profile id is required');
+  });
+
+  it('should throw NotFoundException when profile not found', async () => {
+    const profileId = faker.string.uuid();
+    jest.spyOn(service, 'findById').mockImplementation(async () => null);
+    
+    await expect(controller.getProfile(profileId)).rejects.toThrow('Profile not found');
+  });
+
+  it('should get admin profiles', async () => {
+    const adminProfiles: Profile[] = [
+      {
+        id: faker.string.uuid(),
+        authId: faker.string.uuid(),
+        name: faker.person.firstName(),
+        lastname: faker.person.lastName(),
+        age: faker.number.int({ min: 18, max: 80 }),
+      },
+    ];
+
+    jest.spyOn(service, 'findByRole').mockImplementation(async () => adminProfiles);
+    const data = await controller.getAdmins();
+    expect(data).toBeDefined();
+    expect(has(data, 'data')).toBeTruthy();
+    expect(Array.isArray(data.data)).toBeTruthy();
+    expect(data.data.length).toBe(1);
+    expect(data.message).toBe('Admin profiles retrieved successfully');
+  });
+
+  it('should update my profile', async () => {
+    const userId = faker.string.uuid();
+    const updates = { name: 'Updated Name' };
+    const updatedProfile: Profile = {
+      id: faker.string.uuid(),
+      authId: userId,
+      name: 'Updated Name',
+      lastname: faker.person.lastName(),
+      age: faker.number.int({ min: 18, max: 80 }),
+    };
+
+    jest.spyOn(service, 'updateMyProfile').mockImplementation(async () => updatedProfile);
+    const data = await controller.updateMyProfile(updates, userId);
+    expect(data).toBeDefined();
+    expect(has(data, 'data')).toBeTruthy();
+    expect(data.data.name).toBe('Updated Name');
+    expect(data.message).toBe('Profile updated successfully');
+  });
 });

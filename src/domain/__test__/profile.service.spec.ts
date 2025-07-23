@@ -95,5 +95,83 @@ describe('User Service', () => {
     const data = await service.findById(userId);
     expect(data).toBeNull(); // Mock returns null
   });
+
+  it('should find users by role', async () => {
+    const data = await service.findByRole('ADMIN' as any);
+    expect(data).toBeDefined();
+    expect(Array.isArray(data)).toBeTruthy();
+  });
+
+  it('should update user profile', async () => {
+    const userId = faker.string.uuid();
+    const updates = { name: 'Updated Name' };
+    
+    // Mock findByAuthId to return a profile
+    const mockProfile = {
+      id: faker.string.uuid(),
+      authId: userId,
+      name: 'Original Name',
+      lastname: 'Lastname',
+      age: 25,
+    };
+    
+    jest.spyOn(service['repository'], 'findByAuthId').mockResolvedValue(mockProfile as any);
+    jest.spyOn(service['repository'], 'update').mockResolvedValue({ ...mockProfile, ...updates } as any);
+    
+    const data = await service.updateMyProfile(updates, userId);
+    expect(data).toBeDefined();
+    expect(data.name).toBe('Updated Name');
+  });
+
+  it('should throw error when updating non-existent profile', async () => {
+    const userId = faker.string.uuid();
+    const updates = { name: 'Updated Name' };
+    
+    jest.spyOn(service['repository'], 'findByAuthId').mockResolvedValue(null);
+    
+    await expect(service.updateMyProfile(updates, userId)).rejects.toThrow('Profile not found for current user');
+  });
+
+  it('should check if profile is complete', async () => {
+    const profileId = faker.string.uuid();
+    const mockProfile = {
+      id: profileId,
+      authId: faker.string.uuid(),
+      name: 'Test',
+      lastname: 'User',
+      age: 25,
+    };
+    
+    jest.spyOn(service['repository'], 'findById').mockResolvedValue(mockProfile as any);
+    jest.spyOn(service['profileDomainService'], 'isProfileComplete').mockReturnValue(true);
+    
+    const result = await service.isProfileComplete(profileId);
+    expect(result).toBe(true);
+  });
+
+  it('should return false for profile completeness when profile not found', async () => {
+    const profileId = faker.string.uuid();
+    
+    jest.spyOn(service['repository'], 'findById').mockResolvedValue(null);
+    
+    const result = await service.isProfileComplete(profileId);
+    expect(result).toBe(false);
+  });
+
+  it('should throw error when creating duplicate profile', async () => {
+    const createDto = {
+      authId: faker.string.uuid(),
+      name: 'Test',
+      lastname: 'User',
+      age: 25,
+    };
+    
+    const existingProfile = { id: faker.string.uuid(), ...createDto };
+    
+    jest.spyOn(service['repository'], 'findByAuthId').mockResolvedValue(existingProfile as any);
+    jest.spyOn(service['profileDomainService'], 'canCreateProfile').mockReturnValue(false);
+    
+    await expect(service.create(createDto)).rejects.toThrow('Profile already exists for this user');
+  });
 });
 
