@@ -45,19 +45,57 @@ export class AuthService {
 
   async register(
     registerDto: RegisterAuthDto,
-  ): Promise<{ message: string; authId: string; profileId: string }> {
+  ): Promise<{
+    message: string;
+    authId: string;
+    profileId: string;
+    access_token: string;
+    refresh_token: string;
+    profile?: any;
+  }> {
     const authId = this.authDomainService.generateUserId();
     const profileId = this.profileDomainService.generateProfileId();
+    const context = { module: 'AuthService', method: 'register' };
 
-    await this.commandBus.execute(
-      new CreateAuthUserCommand(registerDto, authId, profileId),
-    );
+    await this.commandBus.execute(new CreateAuthUserCommand(registerDto, authId, profileId));
 
-    this.logger.logger(`Registration process started for user ${authId}.`, {
-      module: 'AuthService',
-      method: 'register',
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const auth = await this.authRepository.findById(authId);
+    if (!auth) {
+      this.logger.err(`Failed to find created user with ID: ${authId}`, context);
+      throw new Error('Registration failed - user not found after creation');
+    }
+
+    const { accessToken, refreshToken } = await this.generateTokens(auth);
+
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.authRepository.update(auth.id, {
+      currentHashedRefreshToken: hashedRefreshToken,
+      lastLoginAt: new Date(),
     });
-    return { message: 'Registration process started.', authId, profileId };
+
+    let profile = null;
+    try {
+      profile = await this.profileRepository.findByAuthId(authId);
+    } catch (error) {
+      this.logger.warning(`Profile not yet available for user ${authId}`, context);
+    }
+
+    this.logger.logger(`User registered and authenticated successfully: ${auth.email}`, context);
+
+    return {
+      message: 'Registration successful - you are now logged in.',
+      authId,
+      profileId,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      profile: profile ? {
+        id: profile.id,
+        name: profile.name,
+        age: profile.age,
+      } : null,
+    };
   }
 
   async validateUser(email: string, pass: string): Promise<AuthUser | null> {
