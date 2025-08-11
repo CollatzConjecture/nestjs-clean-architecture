@@ -124,6 +124,19 @@ export class AuthDomainService {
   }
 
   /**
+   * Business Logic: Validate password change data
+   */
+  validatePasswordChangeData(data: { oldPassword: string; newPassword: string }): void {
+    if (!this.isPasswordValid(data.newPassword)) {
+      throw new Error('Password must include at least one uppercase letter, one lowercase letter, and one number');
+    }
+
+    if (data.oldPassword === data.newPassword) {
+      throw new Error('New password must be different from old password');
+    }
+  }
+
+  /**
    * Business Logic: Validate email format
    * @param email - Email to validate
    */

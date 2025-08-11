@@ -28,6 +28,8 @@ import {
 } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { Request as ExpressRequest, Response } from 'express';
+import { CurrentUserId } from '@application/decorators/current-user.decorator';
+import { ChangePasswordDto } from '@api/dto/auth/change-password.dto';
 
 @ApiTags('auth')
 @Controller({
@@ -73,6 +75,19 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async logout(@Request() req) {
     const result = await this.authService.logout(req.user.id);
+    return this.responseService.success(result.message);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('change-password')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change password for the current user' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  async changePassword(@CurrentUserId() userId: string, @Body() dto: ChangePasswordDto) {
+    const result = await this.authService.changePassword(userId, dto.oldPassword, dto.newPassword);
     return this.responseService.success(result.message);
   }
 

@@ -123,6 +123,33 @@ export class AuthService {
     };
   }
 
+  async changePassword(userId: string, oldPassword: string, newPassword: string): Promise<{ message: string }> {
+    const context = { module: 'AuthService', method: 'changePassword' };
+
+    // Validate new password strength and difference from old
+    this.authDomainService.validatePasswordChangeData({ oldPassword, newPassword });
+
+    const auth = await this.authRepository.findById(userId, true);
+    if (!auth) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Verify old password
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, auth.password);
+    if (!isOldPasswordValid) {
+      throw new UnauthorizedException('Old password is incorrect');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.authRepository.update(auth.id, {
+      password: hashedPassword,
+      currentHashedRefreshToken: null,
+    });
+
+    this.logger.logger(`Password changed successfully for user: ${auth.email}`, context);
+    return { message: 'Password changed successfully' };
+  }
+
   async logout(userId: string): Promise<{ message: string }> {
     await this.authRepository.removeRefreshToken(userId);
     this.logger.logger(`User ${userId} logged out successfully.`, {
