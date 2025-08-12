@@ -32,8 +32,8 @@ export class DeleteAuthUserHandler implements ICommandHandler<DeleteAuthUserComm
             return;
         }
 
-        await this.authRepository.delete(authId);
         await this.profileRepository.delete(profileId);
+        await this.authRepository.delete(authId);
 
         this.logger.logger(`Auth user ${authId} and profile ${profileId} deleted successfully. Dispatching event.`, context);
         
