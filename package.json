@@ -17,7 +17,7 @@
     "docker:logs": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f api",
     "docker:start": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml start",
     "docker:stop": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml stop",
-    "docker:down": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml down",
+    "docker:down": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v",
     "docker:restart": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml down && docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "test": "jest",
