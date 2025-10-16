@@ -10,4 +10,5 @@ export class AuthUser {
   lastLoginAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+  deletedAt?: Date | null;
 }

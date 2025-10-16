@@ -7,18 +7,20 @@ export const ProfileSchema = new mongoose.Schema({
   name: String,
   lastname: String,
   age: Number,
+  deletedAt: { type: Date, default: null },
 }, {
   timestamps: true,
 });
 
 export interface Profile extends mongoose.Document {
-    readonly id: string;
-    readonly authId: string;
-    readonly name: string;
-    readonly lastname: string;
-    readonly age: number;
-    readonly createdAt: Date;
-    readonly updatedAt: Date;
+  readonly id: string;
+  readonly authId: string;
+  readonly name: string;
+  readonly lastname?: string;
+  readonly age?: number;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly deletedAt?: Date | null;
 }
 
 export class ProfileModel {
@@ -28,15 +30,19 @@ export class ProfileModel {
     this.name = profile.name;
     this.lastname = profile.lastname;
     this.age = profile.age;
+    this.deletedAt = null;
   }
 
   id?: string;
   authId: string;
   name: string;
-  lastname: string;
-  age: number;
+  lastname?: string;
+  age?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date | null;
 
   save(): ProfileModel {
     return this;
-  } 
+  }
 }

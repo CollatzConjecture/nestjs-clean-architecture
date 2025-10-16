@@ -17,7 +17,7 @@ export class AuthRepository implements IAuthRepository {
 
   async findByEmail(email: string, withPassword?: boolean): Promise<AuthUser | null> {
     const emailHash = createBlindIndex(email);
-    const query = this.authModel.findOne({ emailHash });
+    const query = this.authModel.findOne({ emailHash, deletedAt: null });
     if (withPassword) {
       query.select('+password');
     }
@@ -27,7 +27,7 @@ export class AuthRepository implements IAuthRepository {
 
   async findById(id: string, withPassword?: boolean): Promise<AuthUser | null> {
     const query = this.authModel
-      .findOne({ id })
+      .findOne({ id, deletedAt: null })
       .select('+currentHashedRefreshToken');
 
     if (withPassword) {
@@ -39,13 +39,13 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async findByGoogleId(googleId: string): Promise<AuthUser | null> {
-    const auth = await this.authModel.findOne({ googleId }).exec();
+    const auth = await this.authModel.findOne({ googleId, deletedAt: null }).exec();
     return auth ? auth.toObject() as AuthUser : null;
   }
 
   async update(id: string, authData: Partial<AuthUser>): Promise<AuthUser> {
     const updatedAuth = await this.authModel.findOneAndUpdate(
-      { id },
+      { id, deletedAt: null },
       { $set: authData },
       { new: true }
     ).exec();
@@ -58,10 +58,13 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.authModel.findOneAndDelete({ id }).exec();
+    await this.authModel.updateOne({ id, deletedAt: null }, { $set: { deletedAt: new Date() } }).exec();
   }
 
   async removeRefreshToken(id: string): Promise<void> {
-    await this.authModel.updateOne({ id }, { currentHashedRefreshToken: null }).exec();
+    await this.authModel.updateOne(
+      { id, deletedAt: null },
+      { $set: { currentHashedRefreshToken: null } },
+    ).exec();
   }
 }

@@ -51,6 +51,7 @@ export const AuthSchema = new mongoose.Schema({
   role: { type: [String], required: true, enum: Role, default: [Role.USER] },
   currentHashedRefreshToken: { type: String, select: false },
   lastLoginAt: { type: Date },
+  deletedAt: { type: Date, default: null },
 }, {
   toJSON: { getters: true },
   toObject: { getters: true },
@@ -84,4 +85,5 @@ export interface Auth extends mongoose.Document {
   readonly lastLoginAt?: Date;
   readonly createdAt: Date;
   readonly updatedAt: Date;
-} 
+  readonly deletedAt?: Date | null;
+}
