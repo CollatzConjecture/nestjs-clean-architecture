@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import type { StringValue } from 'ms';
 
 dotenv.config();
 
@@ -21,9 +22,12 @@ export const MONGO_PORT = parseInt(process.env.MONGO_PORT || '27017', 10);
 
 // JWT Constants
 export const JWT_SECRET = process.env.JWT_SECRET || 'your-default-secret';
-export const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-default-refresh-secret';
-export const JWT_EXPIRATION_TIME = process.env.JWT_EXPIRATION_TIME || '3600s';
-export const JWT_REFRESH_EXPIRATION_TIME = process.env.JWT_REFRESH_EXPIRATION_TIME || '7d';
+export const JWT_REFRESH_SECRET =
+  process.env.JWT_REFRESH_SECRET || 'your-default-refresh-secret';
+export const JWT_EXPIRATION_TIME = (process.env.JWT_EXPIRATION_TIME ??
+  '3600s') as StringValue;
+export const JWT_REFRESH_EXPIRATION_TIME = (process.env
+  .JWT_REFRESH_EXPIRATION_TIME ?? '7d') as StringValue;
 
 // Google OAuth Constants (Web)
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;

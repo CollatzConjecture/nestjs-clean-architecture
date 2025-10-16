@@ -226,23 +226,23 @@ This project follows a strict 4-layer architecture:
 
 ## 🐳 Running with Docker Compose
 
-The project is configured to run seamlessly with Docker. Use the npm scripts from `package.json` for convenience.
+The project is configured to run seamlessly with Docker. Use the pnpm scripts from `package.json` for convenience.
 
 ```bash
 # Build and start containers in detached mode for development
-$ npm run docker:dev
+$ pnpm run docker:dev
 
 # Build and start containers for production
-$ npm run docker:prod
+$ pnpm run docker:prod
 
 # View logs for the API service
-$ npm run docker:logs
+$ pnpm run docker:logs
 
 # Stop all running containers
-$ npm run docker:down
+$ pnpm run docker:down
 
 # Restart the development environment
-$ npm run docker:restart
+$ pnpm run docker:restart
 ```
 
 ### 🌐 Service Access
@@ -256,39 +256,39 @@ $ npm run docker:restart
 ## 📦 Installation
 
 ```bash
-$ npm install
+$ pnpm install
 ```
 
 ## 🚀 Running the Application
 
 ```bash
 # Development
-$ npm run start
+$ pnpm run start
 
 # Watch mode (recommended for development)
-$ npm run start:dev
+$ pnpm run start:dev
 
 # Production mode
-$ npm run start:prod
+$ pnpm run start:prod
 
 # Debug mode
-$ npm run start:debug
+$ pnpm run start:debug
 ```
 
 ## 🧪 Testing
 
 ```bash
 # Unit tests
-$ npm run test
+$ pnpm run test
 
 # E2E tests
-$ npm run test:e2e
+$ pnpm run test:e2e
 
 # Test coverage
-$ npm run test:cov
+$ pnpm run test:cov
 
 # Watch mode
-$ npm run test:watch
+$ pnpm run test:watch
 ```
 
 ## 🧪 API Testing
