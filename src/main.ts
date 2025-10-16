@@ -1,7 +1,8 @@
 // Only For module alias
+import * as moduleAlias from 'module-alias';
 import 'module-alias/register';
 import * as path from 'path';
-import * as moduleAlias from 'module-alias';
+
 moduleAlias.addAliases({
   '@domain': path.resolve(__dirname, 'domain'),
   '@application': path.resolve(__dirname, 'application'),
@@ -11,31 +12,35 @@ moduleAlias.addAliases({
 });
 
 // App modules
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { APP_PORT } from '@constants';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Set global API prefix
-  app.setGlobalPrefix('api');
-  
+  app.setGlobalPrefix('api', {
+    exclude: [{ path: 'health', method: RequestMethod.GET }],
+  });
+
   // Enable versioning
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
-  
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-  }));
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
   app.use(cookieParser());
-  
+
   // Swagger configuration
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()

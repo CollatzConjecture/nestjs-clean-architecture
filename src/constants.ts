@@ -25,10 +25,16 @@ export const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-defaul
 export const JWT_EXPIRATION_TIME = process.env.JWT_EXPIRATION_TIME || '3600s';
 export const JWT_REFRESH_EXPIRATION_TIME = process.env.JWT_REFRESH_EXPIRATION_TIME || '7d';
 
-// Google OAuth Constants
+// Google OAuth Constants (Web)
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
+
+// Mobile Google OAuth Constants (Platform-specific)
+export const GOOGLE_IOS_CLIENT_ID = process.env.GOOGLE_IOS_CLIENT_ID;
+export const GOOGLE_ANDROID_CLIENT_ID = process.env.GOOGLE_ANDROID_CLIENT_ID;
+export const GOOGLE_MOBILE_CALLBACK_IOS_URL = process.env.GOOGLE_MOBILE_CALLBACK_IOS_URL;
+export const GOOGLE_MOBILE_CALLBACK_ANDROID_URL = process.env.GOOGLE_MOBILE_CALLBACK_ANDROID_URL;
 
 // Encryption Constants
 if (!process.env.EMAIL_ENCRYPTION_KEY) {

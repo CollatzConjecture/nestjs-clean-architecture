@@ -8,6 +8,7 @@ import { ResponseInterceptor } from '@application/interceptors/response.intercep
 import { LoggerMiddleware } from '@application/middlewere/logger.middleware';
 import { RequestIdMiddleware } from '@application/middlewere/request-id.middleware';
 import { ResponseService } from '@application/services/response.service';
+import { HealthController } from '@infrastructure/health/health.controller';
 import { TerminusOptionsService } from '@infrastructure/health/terminus-options.check';
 import { LoggerModule } from '@infrastructure/logger/logger.module';
 import { HttpModule } from '@nestjs/axios';
@@ -32,7 +33,7 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
     PrometheusModule.register(),
     LoggerModule,
   ],
-  controllers: [HelloController],
+  controllers: [HelloController, HealthController],
   providers: [
     TerminusOptionsService,
     ResponseService,
