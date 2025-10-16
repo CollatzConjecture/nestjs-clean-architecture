@@ -17,7 +17,7 @@ export class ProfileService {
   ) {}
 
   async create(createProfileDto: CreateProfileDto): Promise<Profile> {
-    this.logger.logger(`Creating profile.`, {
+    this.logger.logger('Creating profile.', {
       module: 'ProfileService',
       method: 'create',
     });

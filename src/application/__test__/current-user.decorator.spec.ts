@@ -1,14 +1,19 @@
-import { ExecutionContext } from '@nestjs/common';
 import { JwtPayload } from '@application/interfaces/authenticated-request.interface';
 import { Role } from '@domain/entities/enums/role.enum';
-import { CurrentUser, CurrentUserId, IsAdmin } from '@application/decorators/current-user.decorator';
+import { ExecutionContext } from '@nestjs/common';
 
-const currentUserCallback = (data: unknown, ctx: ExecutionContext): JwtPayload => {
+const currentUserCallback = (
+  data: unknown,
+  ctx: ExecutionContext,
+): JwtPayload => {
   const request = ctx.switchToHttp().getRequest();
   return request.user;
 };
 
-const currentUserIdCallback = (data: unknown, ctx: ExecutionContext): string => {
+const currentUserIdCallback = (
+  data: unknown,
+  ctx: ExecutionContext,
+): string => {
   const request = ctx.switchToHttp().getRequest();
   return request.user.id;
 };
@@ -37,7 +42,7 @@ describe('CurrentUser Decorators', () => {
         getRequest: jest.fn().mockReturnValue(mockRequest),
       }),
     } as any;
-    
+
     capturedCallbacks = [];
   });
 
@@ -107,19 +112,25 @@ describe('CurrentUser Decorators', () => {
 
   describe('Decorator Exports', () => {
     it('should export CurrentUser decorator', async () => {
-      const { CurrentUser } = await import('@application/decorators/current-user.decorator');
+      const { CurrentUser } = await import(
+        '@application/decorators/current-user.decorator'
+      );
       expect(CurrentUser).toBeDefined();
       expect(typeof CurrentUser).toBe('function');
     });
 
     it('should export CurrentUserId decorator', async () => {
-      const { CurrentUserId } = await import('@application/decorators/current-user.decorator');
+      const { CurrentUserId } = await import(
+        '@application/decorators/current-user.decorator'
+      );
       expect(CurrentUserId).toBeDefined();
       expect(typeof CurrentUserId).toBe('function');
     });
 
     it('should export IsAdmin decorator', async () => {
-      const { IsAdmin } = await import('@application/decorators/current-user.decorator');
+      const { IsAdmin } = await import(
+        '@application/decorators/current-user.decorator'
+      );
       expect(IsAdmin).toBeDefined();
       expect(typeof IsAdmin).toBe('function');
     });
@@ -128,8 +139,9 @@ describe('CurrentUser Decorators', () => {
   describe('Actual Decorator Callback Coverage', () => {
     it('should execute actual decorator callbacks for 100% coverage', () => {
       // Mock createParamDecorator to capture callbacks and execute them
-      const originalCreateParamDecorator = jest.requireActual('@nestjs/common').createParamDecorator;
-      
+      const originalCreateParamDecorator =
+        jest.requireActual('@nestjs/common').createParamDecorator;
+
       jest.doMock('@nestjs/common', () => ({
         ...jest.requireActual('@nestjs/common'),
         createParamDecorator: jest.fn((callback) => {
@@ -137,44 +149,49 @@ describe('CurrentUser Decorators', () => {
           return originalCreateParamDecorator(callback);
         }),
       }));
-      
+
       // Clear module cache and re-import to trigger decorator creation
       jest.resetModules();
-      const decoratorModule = require('@application/decorators/current-user.decorator');
-      
+
       // Execute all captured callbacks to achieve coverage
       capturedCallbacks.forEach((callback, index) => {
         const result = callback(null, mockExecutionContext);
-        
+
         switch (index) {
-          case 0: // CurrentUser
+          case 0: {
+            // CurrentUser
             expect(result).toEqual(mockRequest.user);
             break;
-          case 1: // CurrentUserId  
+          }
+          case 1: {
+            // CurrentUserId
             expect(result).toBe('user-123');
             break;
-          case 2: // IsAdmin
+          }
+          case 2: {
+            // IsAdmin
             expect(result).toBe(false);
-            
+
             // Test admin case
             mockRequest.user.roles = [Role.ADMIN];
             const adminResult = callback(null, mockExecutionContext);
             expect(adminResult).toBe(true);
-            
+
             // Test undefined roles
             mockRequest.user.roles = undefined;
             const undefinedResult = callback(null, mockExecutionContext);
             expect(undefinedResult).toBe(false);
-            
+
             // Reset for next test
             mockRequest.user.roles = [Role.USER];
             break;
+          }
         }
       });
-      
+
       // Verify we captured all three decorators
       expect(capturedCallbacks).toHaveLength(3);
-      
+
       // Restore original implementation
       jest.unmock('@nestjs/common');
       jest.resetModules();

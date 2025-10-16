@@ -19,7 +19,7 @@ import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   JWT_REFRESH_SECRET,
-  JWT_REFRESH_EXPIRATION_TIME
+  JWT_REFRESH_EXPIRATION_TIME,
 } from '@constants';
 import { AuthUser } from '@domain/entities/Auth';
 import { Role } from '@domain/entities/enums/role.enum';
@@ -41,11 +41,9 @@ export class AuthService {
     private readonly logger: LoggerService,
     private readonly authDomainService: AuthDomainService,
     private readonly profileDomainService: ProfileDomainService,
-  ) { }
+  ) {}
 
-  async register(
-    registerDto: RegisterAuthDto,
-  ): Promise<{
+  async register(registerDto: RegisterAuthDto): Promise<{
     message: string;
     authId: string;
     profileId: string;
@@ -57,13 +55,18 @@ export class AuthService {
     const profileId = this.profileDomainService.generateProfileId();
     const context = { module: 'AuthService', method: 'register' };
 
-    await this.commandBus.execute(new CreateAuthUserCommand(registerDto, authId, profileId));
+    await this.commandBus.execute(
+      new CreateAuthUserCommand(registerDto, authId, profileId),
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     const auth = await this.authRepository.findById(authId);
     if (!auth) {
-      this.logger.err(`Failed to find created user with ID: ${authId}`, context);
+      this.logger.err(
+        `Failed to find created user with ID: ${authId}`,
+        context,
+      );
       throw new Error('Registration failed - user not found after creation');
     }
 
@@ -78,11 +81,17 @@ export class AuthService {
     let profile = null;
     try {
       profile = await this.profileRepository.findByAuthId(authId);
-    } catch (error) {
-      this.logger.warning(`Profile not yet available for user ${authId}`, context);
+    } catch (_error) {
+      this.logger.warning(
+        `Profile not yet available for user ${authId}`,
+        context,
+      );
     }
 
-    this.logger.logger(`User registered and authenticated successfully: ${auth.email}`, context);
+    this.logger.logger(
+      `User registered and authenticated successfully: ${auth.email}`,
+      context,
+    );
 
     return {
       message: 'Registration successful - you are now logged in.',
@@ -90,11 +99,13 @@ export class AuthService {
       profileId,
       access_token: accessToken,
       refresh_token: refreshToken,
-      profile: profile ? {
-        id: profile.id,
-        name: profile.name,
-        age: profile.age,
-      } : null,
+      profile: profile
+        ? {
+            id: profile.id,
+            name: profile.name,
+            age: profile.age,
+          }
+        : null,
     };
   }
 
@@ -125,7 +136,7 @@ export class AuthService {
       this.logger.logger(`User ${email} not found.`, context);
       throw new NotFoundException('User not found');
     }
-    if (!(await bcrypt.compare(loginDto.password, auth.password))) {
+    if (!(await bcrypt.compare(password, auth.password))) {
       this.logger.warning(`Failed login attempt for user ${email}.`, context);
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -145,27 +156,32 @@ export class AuthService {
       currentHashedRefreshToken: hashedRefreshToken,
     });
 
-    const payload = { email: auth.email, sub: auth.id, roles: auth.role };
-
     this.logger.logger(`User ${email} logged in successfully.`, context);
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
       profile: profile
         ? {
-          id: profile.id,
-          name: profile.name,
-          age: profile.age,
-        }
+            id: profile.id,
+            name: profile.name,
+            age: profile.age,
+          }
         : null,
     };
   }
 
-  async changePassword(userId: string, oldPassword: string, newPassword: string): Promise<{ message: string }> {
+  async changePassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
     const context = { module: 'AuthService', method: 'changePassword' };
 
     // Validate new password strength and difference from old
-    this.authDomainService.validatePasswordChangeData({ oldPassword, newPassword });
+    this.authDomainService.validatePasswordChangeData({
+      oldPassword,
+      newPassword,
+    });
 
     const auth = await this.authRepository.findById(userId, true);
     if (!auth) {
@@ -184,7 +200,10 @@ export class AuthService {
       currentHashedRefreshToken: null,
     });
 
-    this.logger.logger(`Password changed successfully for user: ${auth.email}`, context);
+    this.logger.logger(
+      `Password changed successfully for user: ${auth.email}`,
+      context,
+    );
     return { message: 'Password changed successfully' };
   }
 
@@ -226,7 +245,8 @@ export class AuthService {
       }
 
       // Generate new tokens
-      const { accessToken, refreshToken: newRefreshToken } = await this.generateTokens(auth);
+      const { accessToken, refreshToken: newRefreshToken } =
+        await this.generateTokens(auth);
 
       // Store new refresh token hash (token rotation)
       const hashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
@@ -277,14 +297,14 @@ export class AuthService {
   initiateGoogleAuth() {
     const state = crypto.randomBytes(20).toString('hex');
     const redirectUrl =
-      `https://accounts.google.com/o/oauth2/v2/auth?` +
+      'https://accounts.google.com/o/oauth2/v2/auth?' +
       `client_id=${GOOGLE_CLIENT_ID}` +
       `&redirect_uri=${encodeURIComponent(GOOGLE_CALLBACK_URL)}` +
-      `&response_type=code` +
-      `&scope=openid%20email%20profile` +
-      `&access_type=offline` +
+      '&response_type=code' +
+      '&scope=openid%20email%20profile' +
+      '&access_type=offline' +
       `&state=${state}`;
-    this.logger.logger(`Initiating Google OAuth.`, {
+    this.logger.logger('Initiating Google OAuth.', {
       module: 'AuthService',
       method: 'initiateGoogleAuth',
     });
@@ -293,7 +313,7 @@ export class AuthService {
 
   async handleGoogleRedirect(code: string, state: string, storedState: string) {
     if (!state || state !== storedState) {
-      this.logger.logger(`Invalid state or state mismatch.`, {
+      this.logger.logger('Invalid state or state mismatch.', {
         module: 'AuthService',
         method: 'handleGoogleRedirect',
       });

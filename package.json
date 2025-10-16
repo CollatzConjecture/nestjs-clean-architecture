@@ -19,7 +19,8 @@
     "docker:stop": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml stop",
     "docker:down": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v",
     "docker:restart": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml down && docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build",
-    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "lint": "eslint . --ext .ts --max-warnings=0",
+    "lint:fix": "eslint --ext .ts --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage ",
@@ -64,6 +65,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.15.0",
     "@faker-js/faker": "^10.1.0",
     "@nestjs/testing": "^11.1.6",
     "@types/bcrypt": "^6.0.0",
@@ -79,6 +81,7 @@
     "@typescript-eslint/parser": "^8.46.1",
     "concurrently": "^9.2.1",
     "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.0.1",
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
@@ -87,6 +90,7 @@
     "ts-node": "10.9.2",
     "tsconfig-paths": "4.2.0",
     "typescript": "5.9.3",
+    "typescript-eslint": "^8.16.0",
     "wait-on": "^9.0.1"
   },
   "jest": {

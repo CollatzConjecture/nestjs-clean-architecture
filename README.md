@@ -291,6 +291,16 @@ $ pnpm run test:cov
 $ pnpm run test:watch
 ```
 
+## 🧹 Linting
+
+```bash
+# Check code style
+$ pnpm run lint
+
+# Auto-fix issues where possible
+$ pnpm run lint:fix
+```
+
 ## 🧪 API Testing
 
 You can import this [Postman collection](./NestJS%20CA-DDD.postman_collection.json) to test the API endpoints.

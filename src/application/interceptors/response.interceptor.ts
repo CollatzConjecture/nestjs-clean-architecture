@@ -15,7 +15,6 @@ export class ResponseInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
-    const { path, method } = request;
 
     return next.handle().pipe(
       map((data) => {

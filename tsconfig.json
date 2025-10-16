@@ -8,14 +8,13 @@
     "target": "es6",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "paths": {
-      "@constants": ["src/constants"],
-      "@domain/*": ["src/domain/*"],
-      "@application/*": ["src/application/*"],
-      "@infrastructure/*": ["src/infrastructure/*"],
-      "@api/*": ["src/api/*"]
+      "@constants": ["./src/constants"],
+      "@domain/*": ["./src/domain/*"],
+      "@application/*": ["./src/application/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"],
+      "@api/*": ["./src/api/*"]
     }
   },
   "exclude": ["node_modules"]

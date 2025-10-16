@@ -9,7 +9,7 @@ describe('App (e2e)', () => {
   let moduleFixture: TestingModule;
   let accessToken: string;
   let isDbConnected = false;
-  
+
   const testUser = {
     name: faker.person.firstName(),
     lastname: faker.person.lastName(),
@@ -25,16 +25,16 @@ describe('App (e2e)', () => {
       }).compile();
 
       app = moduleFixture.createNestApplication();
-      
+
       // Configure the app the same way as in main.ts
       app.setGlobalPrefix('api');
       app.enableVersioning({
         type: VersioningType.URI,
         defaultVersion: '1',
       });
-      
+
       await app.init();
-      
+
       try {
         // Test database connectivity by trying to register a user
         const registerResponse = await request(app.getHttpServer())
@@ -84,7 +84,7 @@ describe('App (e2e)', () => {
           if (mongoConnection && mongoConnection.connection) {
             await mongoConnection.connection.close();
           }
-        } catch (error) {
+        } catch (_error) {
           // Ignore if connection doesn't exist
         }
 

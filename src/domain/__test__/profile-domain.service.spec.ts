@@ -71,7 +71,9 @@ describe('ProfileDomainService', () => {
         age: 25,
       };
 
-      expect(() => service.createProfileEntity(profileData)).toThrow('Name must be at least 2 characters long');
+      expect(() => service.createProfileEntity(profileData)).toThrow(
+        'Name must be at least 2 characters long',
+      );
     });
 
     it('should throw error for invalid lastname', () => {
@@ -82,7 +84,9 @@ describe('ProfileDomainService', () => {
         age: 25,
       };
 
-      expect(() => service.createProfileEntity(profileData)).toThrow('Lastname must be at least 2 characters long');
+      expect(() => service.createProfileEntity(profileData)).toThrow(
+        'Lastname must be at least 2 characters long',
+      );
     });
   });
 
@@ -103,22 +107,30 @@ describe('ProfileDomainService', () => {
 
     it('should throw error when profile not found', () => {
       const updates = { name: 'Jane' };
-      expect(() => service.validateProfileUpdate(null as any, updates)).toThrow('Profile not found');
+      expect(() => service.validateProfileUpdate(null as any, updates)).toThrow(
+        'Profile not found',
+      );
     });
 
     it('should throw error for invalid age in updates', () => {
       const updates = { age: -5 };
-      expect(() => service.validateProfileUpdate(existingProfile, updates)).toThrow('Age must be between 0 and 150');
+      expect(() =>
+        service.validateProfileUpdate(existingProfile, updates),
+      ).toThrow('Age must be between 0 and 150');
     });
 
     it('should throw error for invalid name in updates', () => {
       const updates = { name: 'J' };
-      expect(() => service.validateProfileUpdate(existingProfile, updates)).toThrow('Name must be at least 2 characters long');
+      expect(() =>
+        service.validateProfileUpdate(existingProfile, updates),
+      ).toThrow('Name must be at least 2 characters long');
     });
 
     it('should throw error for invalid lastname in updates', () => {
       const updates = { lastname: 'D' };
-      expect(() => service.validateProfileUpdate(existingProfile, updates)).toThrow('Lastname must be at least 2 characters long');
+      expect(() =>
+        service.validateProfileUpdate(existingProfile, updates),
+      ).toThrow('Lastname must be at least 2 characters long');
     });
   });
 
@@ -200,24 +212,40 @@ describe('ProfileDomainService', () => {
   describe('validation methods', () => {
     it('should validate name correctly', () => {
       expect(() => service.validateName('John')).not.toThrow();
-      expect(() => service.validateName('J')).toThrow('Name must be at least 2 characters long');
-      expect(() => service.validateName('')).toThrow('Name must be at least 2 characters long');
-      expect(() => service.validateName('  ')).toThrow('Name must be at least 2 characters long');
+      expect(() => service.validateName('J')).toThrow(
+        'Name must be at least 2 characters long',
+      );
+      expect(() => service.validateName('')).toThrow(
+        'Name must be at least 2 characters long',
+      );
+      expect(() => service.validateName('  ')).toThrow(
+        'Name must be at least 2 characters long',
+      );
     });
 
     it('should validate lastname correctly', () => {
       expect(() => service.validateLastname('Doe')).not.toThrow();
-      expect(() => service.validateLastname('D')).toThrow('Lastname must be at least 2 characters long');
-      expect(() => service.validateLastname('')).toThrow('Lastname must be at least 2 characters long');
-      expect(() => service.validateLastname('  ')).toThrow('Lastname must be at least 2 characters long');
+      expect(() => service.validateLastname('D')).toThrow(
+        'Lastname must be at least 2 characters long',
+      );
+      expect(() => service.validateLastname('')).toThrow(
+        'Lastname must be at least 2 characters long',
+      );
+      expect(() => service.validateLastname('  ')).toThrow(
+        'Lastname must be at least 2 characters long',
+      );
     });
 
     it('should validate age correctly', () => {
       expect(() => service.validateAge(25)).not.toThrow();
       expect(() => service.validateAge(0)).not.toThrow();
       expect(() => service.validateAge(150)).not.toThrow();
-      expect(() => service.validateAge(-1)).toThrow('Age must be between 0 and 150');
-      expect(() => service.validateAge(151)).toThrow('Age must be between 0 and 150');
+      expect(() => service.validateAge(-1)).toThrow(
+        'Age must be between 0 and 150',
+      );
+      expect(() => service.validateAge(151)).toThrow(
+        'Age must be between 0 and 150',
+      );
     });
   });
 
@@ -229,14 +257,18 @@ describe('ProfileDomainService', () => {
 
     it('should throw error for invalid update data', () => {
       const updates = { name: 'J', lastname: 'Doe', age: 25 };
-      expect(() => service.validateProfileUpdateData(updates)).toThrow('Name must be at least 2 characters long');
+      expect(() => service.validateProfileUpdateData(updates)).toThrow(
+        'Name must be at least 2 characters long',
+      );
     });
   });
 
   describe('generateProfileId', () => {
     it('should generate profile ID with correct prefix', () => {
       const id = service.generateProfileId();
-      expect(id).toMatch(/^profile-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+      expect(id).toMatch(
+        /^profile-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+      );
     });
 
     it('should generate unique IDs', () => {

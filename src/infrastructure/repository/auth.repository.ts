@@ -7,7 +7,9 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class AuthRepository implements IAuthRepository {
-  constructor(@Inject(AUTH_MODEL_PROVIDER) private readonly authModel: Model<Auth>) { }
+  constructor(
+    @Inject(AUTH_MODEL_PROVIDER) private readonly authModel: Model<Auth>,
+  ) {}
 
   async create(authData: Partial<AuthUser>): Promise<AuthUser> {
     const newAuth = new this.authModel(authData);
@@ -15,14 +17,17 @@ export class AuthRepository implements IAuthRepository {
     return savedAuth.toObject() as AuthUser;
   }
 
-  async findByEmail(email: string, withPassword?: boolean): Promise<AuthUser | null> {
+  async findByEmail(
+    email: string,
+    withPassword?: boolean,
+  ): Promise<AuthUser | null> {
     const emailHash = createBlindIndex(email);
     const query = this.authModel.findOne({ emailHash, deletedAt: null });
     if (withPassword) {
       query.select('+password');
     }
     const auth = await query.exec();
-    return auth ? auth.toObject() as AuthUser : null;
+    return auth ? (auth.toObject() as AuthUser) : null;
   }
 
   async findById(id: string, withPassword?: boolean): Promise<AuthUser | null> {
@@ -39,16 +44,20 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async findByGoogleId(googleId: string): Promise<AuthUser | null> {
-    const auth = await this.authModel.findOne({ googleId, deletedAt: null }).exec();
-    return auth ? auth.toObject() as AuthUser : null;
+    const auth = await this.authModel
+      .findOne({ googleId, deletedAt: null })
+      .exec();
+    return auth ? (auth.toObject() as AuthUser) : null;
   }
 
   async update(id: string, authData: Partial<AuthUser>): Promise<AuthUser> {
-    const updatedAuth = await this.authModel.findOneAndUpdate(
-      { id, deletedAt: null },
-      { $set: authData },
-      { new: true }
-    ).exec();
+    const updatedAuth = await this.authModel
+      .findOneAndUpdate(
+        { id, deletedAt: null },
+        { $set: authData },
+        { new: true },
+      )
+      .exec();
 
     if (!updatedAuth) {
       throw new Error('Auth user not found');
@@ -58,13 +67,17 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.authModel.updateOne({ id, deletedAt: null }, { $set: { deletedAt: new Date() } }).exec();
+    await this.authModel
+      .updateOne({ id, deletedAt: null }, { $set: { deletedAt: new Date() } })
+      .exec();
   }
 
   async removeRefreshToken(id: string): Promise<void> {
-    await this.authModel.updateOne(
-      { id, deletedAt: null },
-      { $set: { currentHashedRefreshToken: null } },
-    ).exec();
+    await this.authModel
+      .updateOne(
+        { id, deletedAt: null },
+        { $set: { currentHashedRefreshToken: null } },
+      )
+      .exec();
   }
 }
