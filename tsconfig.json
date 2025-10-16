@@ -9,6 +9,10 @@
     "sourceMap": true,
     "outDir": "./dist",
     "incremental": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
     "paths": {
       "@constants": ["./src/constants"],
       "@domain/*": ["./src/domain/*"],
